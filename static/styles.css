@@ -1,0 +1,42 @@
+/**
+ * Estilos personalizados para la aplicación Termostato
+ * Los estilos base son proporcionados por Bootstrap
+ */
+
+/* Secciones de contenido */
+section {
+    padding: 40px 0;
+}
+
+/* Encabezado principal */
+header.bg-primary {
+    padding: 60px 0;
+    margin-bottom: 20px;
+}
+
+/* Campos de formulario del termostato */
+.form-group label {
+    font-weight: bold;
+    color: #333;
+}
+
+.form-control[readonly] {
+    background-color: #f8f9fa;
+    font-size: 1.1em;
+}
+
+/* Secciones alternadas */
+section.bg-light {
+    background-color: #f4f4f4;
+}
+
+/* Títulos de sección */
+section h2 {
+    margin-bottom: 20px;
+    color: #337ab7;
+}
+
+/* Páginas de error */
+.page-header h1 {
+    color: #d9534f;
+}

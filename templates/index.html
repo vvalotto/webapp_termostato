@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}Termostato{% endblock %}
+
+{% block content %}
+<meta http-equiv="refresh" content="10">
+  <header class="bg-primary text-white">
+    <div class="container text-center">
+      <h1>Bienvenido al Caso de Estudio - Termostato ISSE</h1>
+      <p class="lead">Para el curso de ISSE </p>
+    </div>
+  </header>
+
+  <section id="ambiente">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 mx-auto">
+          <h2>Ambiente</h2>
+            <div class="row">
+                    <div class="col-sm-4">
+                      <div class="form-group">
+                            <label >Temperatura Ambiente</label>
+                             <input type="text" class="form-control"
+                                            placeholder="{{form.temperatura_ambiente}}"
+                                            readonly>
+                      </div>
+                    </div>
+              </div>
+            <div class="row">
+                    <div class="col-sm-4">
+                      <div class="form-group">
+                            <label>Temperatura Deseada</label>
+                             <input type="text" class="form-control"
+                                            placeholder="{{form.temperatura_deseada}}"
+                                            readonly>
+                      </div>
+                    </div>
+            </div>
+      </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="Climatizador" class="bg-light">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 mx-auto">
+          <h2>Climatizador</h2>
+          <div class="row">
+                    <div class="col-sm-4">
+                      <div class="form-group">
+                            <label>Estado</label>
+                             <input type="text" class="form-control"
+                                            placeholder="{{form.estado_climatizador}}"
+                                            readonly>
+                      </div>
+                    </div>
+            </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="bateria">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 mx-auto">
+          <h2>Batería</h2>
+          <div class="row">
+                    <div class="col-sm-4">
+                      <div class="form-group">
+                            <label>Carga</label>
+                             <input type="text" class="form-control"
+                                            placeholder="{{form.carga_bateria}}"
+                                            readonly>
+                      </div>
+                    </div>
+            </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+{% endblock %}
