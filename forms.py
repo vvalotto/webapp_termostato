@@ -14,9 +14,11 @@ class TermostatoForm(FlaskForm):
         temperatura_ambiente: Temperatura actual del ambiente
         temperatura_deseada: Temperatura objetivo configurada
         carga_bateria: Nivel de carga de la batería
+        nivel_carga_bateria: Nivel de carga (normal/bajo)
         estado_climatizador: Estado actual (encendido/apagado)
     """
     temperatura_ambiente = StringField('Temperatura Ambiente')
     temperatura_deseada = StringField('Temperatura Deseada')
     carga_bateria = StringField('Carga de Batería')
+    nivel_carga_bateria = StringField('Nivel de Carga')
     estado_climatizador = StringField('Estado Climatizador')
