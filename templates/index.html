@@ -67,10 +67,10 @@
               <div class="metric-value">{{form.carga_bateria}}<span class="metric-unit">V</span></div>
             </div>
             <div class="metric-group">
-              <label>Nivel de Carga</label>
+              <label>Indicador de Carga</label>
               <div class="metric-value nivel-badge
-                {% if form.nivel_carga_bateria == 'normal' %}badge-normal{% else %}badge-bajo{% endif %}">
-                {{form.nivel_carga_bateria|upper}}
+                {% if form.indicador_bateria == 'normal' %}badge-normal{% else %}badge-bajo{% endif %}">
+                {{form.indicador_bateria|upper}}
               </div>
             </div>
           </div>

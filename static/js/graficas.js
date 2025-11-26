@@ -190,16 +190,18 @@ function actualizarGraficaTemperatura() {
 
 /**
  * Obtiene el estado actual del climatizador desde el DOM
- * @returns {string|null} 'encendido', 'apagado' o null si no se encuentra
+ * @returns {string|null} 'apagado', 'enfriando', 'calentando' o null si no se encuentra
  */
 function obtenerEstadoClimatizador() {
   const estadoElement = document.querySelector('.card-climatizador .estado-badge');
   if (estadoElement) {
     const texto = estadoElement.textContent.trim().toLowerCase();
-    if (texto.includes('encendido')) {
-      return 'encendido';
-    } else if (texto.includes('apagado')) {
+    if (texto.includes('apagado')) {
       return 'apagado';
+    } else if (texto.includes('enfriando')) {
+      return 'enfriando';
+    } else if (texto.includes('calentando')) {
+      return 'calentando';
     }
   }
   return null;
@@ -238,7 +240,7 @@ function guardarHistoricoClimatizador(historico) {
 /**
  * Agrega un nuevo estado al histórico del climatizador
  * Filtra automáticamente datos más antiguos de 5 minutos
- * @param {string} estado - 'encendido' o 'apagado'
+ * @param {string} estado - 'apagado', 'enfriando' o 'calentando'
  * @returns {Array} Histórico actualizado
  */
 function agregarEstadoClimatizador(estado) {
@@ -248,7 +250,14 @@ function agregarEstadoClimatizador(estado) {
   const timestamp = ahora.toLocaleTimeString('es-ES');
 
   // Convertir estado a valor numérico para la gráfica
-  const valor = estado === 'encendido' ? 1 : 0;
+  let valor;
+  if (estado === 'apagado') {
+    valor = 0;
+  } else if (estado === 'enfriando') {
+    valor = 1;
+  } else if (estado === 'calentando') {
+    valor = 2;
+  }
 
   historico.push({
     estado: estado,
@@ -301,15 +310,17 @@ function actualizarGraficaClimatizador() {
         datasets: [{
           label: 'Estado',
           data: datos,
-          borderColor: 'rgb(46, 204, 113)',
-          backgroundColor: 'rgba(46, 204, 113, 0.2)',
+          borderColor: 'rgb(52, 152, 219)',
+          backgroundColor: 'rgba(52, 152, 219, 0.2)',
           stepped: 'before',
           fill: true,
           pointRadius: 5,
           pointHoverRadius: 7,
           pointBackgroundColor: function(context) {
             const valor = context.parsed.y;
-            return valor === 1 ? 'rgb(46, 204, 113)' : 'rgb(149, 165, 166)';
+            if (valor === 2) return 'rgb(231, 76, 60)'; // Calentando - Rojo
+            if (valor === 1) return 'rgb(52, 152, 219)'; // Enfriando - Azul
+            return 'rgb(149, 165, 166)'; // Apagado - Gris
           }
         }]
       },
@@ -328,7 +339,10 @@ function actualizarGraficaClimatizador() {
             callbacks: {
               label: function(context) {
                 const valor = context.parsed.y;
-                const estado = valor === 1 ? 'ENCENDIDO' : 'APAGADO';
+                let estado;
+                if (valor === 2) estado = 'CALENTANDO';
+                else if (valor === 1) estado = 'ENFRIANDO';
+                else estado = 'APAGADO';
                 return 'Estado: ' + estado;
               }
             }
@@ -336,12 +350,13 @@ function actualizarGraficaClimatizador() {
         },
         scales: {
           y: {
-            min: -0.2,
-            max: 1.2,
+            min: -0.3,
+            max: 2.3,
             ticks: {
               stepSize: 1,
               callback: function(value) {
-                if (value === 1) return 'ENCENDIDO';
+                if (value === 2) return 'CALENTANDO';
+                if (value === 1) return 'ENFRIANDO';
                 if (value === 0) return 'APAGADO';
                 return '';
               }
