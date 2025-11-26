@@ -1,4 +1,4 @@
-dame# Webapp Termostato
+# Webapp Termostato
 
 Aplicación web Flask para visualización del estado de un termostato. Actúa como frontend consumiendo la API REST del backend `app_termostato`.
 
@@ -10,8 +10,10 @@ La aplicación muestra en un **dashboard moderno tipo IoT**:
 - Temperatura ambiente actual
 - Temperatura deseada configurada
 - Estado del climatizador (encendido/apagado)
-- Porcentaje de carga de la batería
+- Voltaje de la batería (en voltios)
 - Nivel de carga de batería (normal/bajo)
+- **Gráfica de evolución de temperatura** (últimos 5 minutos)
+- **Gráfica de historial del climatizador** (últimos 5 minutos)
 
 ## Arquitectura
 
@@ -92,11 +94,13 @@ webapp_termostato/
 ├── lanzador.py          # Punto de entrada de la aplicación
 ├── forms.py             # Definición de formularios WTForms
 ├── templates/
-│   ├── base.html        # Template base con navbar y carga de CSS
-│   ├── index.html       # Dashboard principal con cards
+│   ├── base.html        # Template base con navbar, CSS y Chart.js
+│   ├── index.html       # Dashboard principal con cards y gráficas
 │   ├── 404.html         # Página de error 404
 │   └── 500.html         # Página de error 500
 ├── static/
+│   ├── js/
+│   │   └── graficas.js  # Módulo JavaScript para gráficas (Chart.js)
 │   ├── styles.css       # Estilos CSS personalizados (dashboard moderno)
 │   └── proyecto.ico     # Favicon de la aplicación
 ├── requirements.txt     # Dependencias Python
@@ -112,7 +116,7 @@ La aplicación consume los siguientes endpoints del backend:
 |--------|----------|-------------|
 | GET | `/termostato/temperatura_ambiente/` | Obtiene temperatura ambiente |
 | GET | `/termostato/temperatura_deseada/` | Obtiene temperatura deseada |
-| GET | `/termostato/bateria/` | Obtiene porcentaje de carga de batería |
+| GET | `/termostato/bateria/` | Obtiene voltaje de la batería |
 | GET | `/termostato/nivel_de_carga/` | Obtiene nivel de carga (normal/bajo) |
 | GET | `/termostato/estado_climatizador/` | Obtiene estado del climatizador |
 
@@ -133,12 +137,30 @@ La aplicación consume los siguientes endpoints del backend:
 - **Auto-refresh**: La página se actualiza automáticamente cada 10 segundos
 - **Manejo de errores**: Muestra "Error API" si el backend no responde
 - **Métricas grandes**: Números destacados para fácil lectura
-- **Unidades claras**: °C para temperaturas, % para batería
+- **Unidades claras**: °C para temperaturas, V para voltaje de batería
+- **Gráficas en tiempo real**: Visualización histórica de los últimos 5 minutos
+- **Persistencia local**: Datos almacenados en localStorage del navegador
+- **Limpieza automática**: Solo se guardan datos de los últimos 5 minutos
+
+### Gráficas Interactivas
+- **Gráfica de Temperatura**:
+  - Línea suave con relleno (color turquesa)
+  - Muestra evolución de temperatura ambiente
+  - Se actualiza cada 10 segundos
+  - Ventana temporal: últimos 5 minutos
+- **Gráfica de Climatizador**:
+  - Línea escalonada (ideal para estados binarios)
+  - Código de colores: Verde (encendido) / Gris (apagado)
+  - Puntos coloreados según el estado
+  - Ventana temporal: últimos 5 minutos
 
 ### Tecnologías UI
 - Bootstrap 3 (grid system y componentes)
 - CSS3 (animaciones, gradientes, transformaciones)
 - Jinja2 (templates con lógica condicional para badges)
+- Chart.js 4.4 (gráficas interactivas)
+- JavaScript modular (código organizado en módulos)
+- LocalStorage API (persistencia de datos en el navegador)
 
 ## Vista del Dashboard
 
@@ -158,10 +180,15 @@ El dashboard presenta tres cards principales dispuestas horizontalmente:
 
 ### 🔋 Card Batería (Naranja)
 - Icono de rayo de fondo
-- Porcentaje de carga
+- Voltaje de la batería (en voltios)
 - Badge de nivel de carga:
   - Azul para nivel "NORMAL"
   - Rojo pulsante para nivel "BAJO" (con animación de alerta)
+
+### 📊 Gráficas de Evolución
+Debajo de las cards principales se muestran dos gráficas:
+- **Gráfica de Temperatura**: Evolución temporal con línea suave
+- **Gráfica de Climatizador**: Historial de estados (encendido/apagado) con línea escalonada
 
 **Diseño responsive**: En móviles las cards se apilan verticalmente para mejor visualización.
 
@@ -184,7 +211,7 @@ La aplicación espera que el backend devuelva respuestas JSON con el siguiente f
 {"temperatura_deseada": "25"}
 
 // /termostato/bateria/
-{"carga_bateria": "85"}
+{"carga_bateria": "12.6"}  // Voltaje en voltios
 
 // /termostato/nivel_de_carga/
 {"nivel_de_carga": "normal"}  // o "bajo"
@@ -208,6 +235,57 @@ La aplicación espera que el backend devuelva respuestas JSON con el siguiente f
 **El dashboard no se actualiza**:
 - La página tiene auto-refresh cada 10 segundos
 - Si el backend no responde, mostrará "Error API"
+
+**Las gráficas no se muestran o están vacías**:
+- Las gráficas necesitan al menos un dato para mostrarse
+- Espera 10 segundos (un ciclo de auto-refresh) para que se capture el primer dato
+- Abre la consola del navegador (F12) y busca errores de JavaScript
+- Verifica que Chart.js se haya cargado correctamente desde el CDN
+
+**Limpiar el histórico de las gráficas**:
+Para borrar todos los datos almacenados en localStorage, abre la consola del navegador y ejecuta:
+```javascript
+localStorage.removeItem('temperatura_historico');
+localStorage.removeItem('climatizador_historico');
+```
+
+**Cambiar la ventana de tiempo de las gráficas**:
+Por defecto, las gráficas muestran los últimos 5 minutos. Para cambiar este valor:
+1. Edita el archivo `static/js/graficas.js`
+2. Modifica la constante `VENTANA_TIEMPO_MS` en la línea 9:
+```javascript
+const VENTANA_TIEMPO_MS = 10 * 60 * 1000; // 10 minutos
+```
+
+## Arquitectura del Código JavaScript
+
+El módulo `static/js/graficas.js` está organizado de manera modular:
+
+### Configuración Global
+- `VENTANA_TIEMPO_MS`: Ventana temporal de 5 minutos
+- `filtrarPorTiempo()`: Función utilitaria para filtrar datos antiguos
+
+### Módulo de Temperatura
+- `obtenerTemperaturaActual()`: Extrae temperatura del DOM
+- `cargarHistoricoTemperatura()`: Lee y filtra datos de localStorage
+- `guardarHistoricoTemperatura()`: Guarda solo datos recientes
+- `agregarTemperatura()`: Agrega punto y limpia histórico
+- `actualizarGraficaTemperatura()`: Renderiza gráfica con Chart.js
+
+### Módulo de Climatizador
+- `obtenerEstadoClimatizador()`: Extrae estado del DOM
+- `cargarHistoricoClimatizador()`: Lee y filtra datos de localStorage
+- `guardarHistoricoClimatizador()`: Guarda solo datos recientes
+- `agregarEstadoClimatizador()`: Agrega punto y limpia histórico
+- `actualizarGraficaClimatizador()`: Renderiza gráfica con Chart.js
+
+### Inicialización
+- `inicializarGraficas()`: Punto de entrada ejecutado al cargar el DOM
+
+Este diseño sigue los principios de:
+- **Alta cohesión**: Cada función tiene una responsabilidad única
+- **Bajo acoplamiento**: Módulos independientes
+- **Separación de responsabilidades**: HTML (estructura), CSS (presentación), JS (comportamiento)
 
 ## Licencia
 

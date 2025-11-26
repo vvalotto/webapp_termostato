@@ -227,3 +227,39 @@ body {
     font-weight: 700;
     color: #667eea !important;
 }
+
+/* Card de Gráfica */
+.card-grafica {
+    margin-top: 20px;
+}
+
+.card-grafica .card-title {
+    color: #9b59b6;
+    border-color: #9b59b6;
+}
+
+.card-grafica .card-body {
+    padding: 20px 0;
+}
+
+#temperaturaChart {
+    max-height: 400px;
+}
+
+/* Card de Gráfica Climatizador */
+.card-grafica-climatizador {
+    margin-top: 20px;
+}
+
+.card-grafica-climatizador .card-title {
+    color: #2ecc71;
+    border-color: #2ecc71;
+}
+
+.card-grafica-climatizador .card-body {
+    padding: 20px 0;
+}
+
+#climatizadorChart {
+    max-height: 400px;
+}

@@ -64,7 +64,7 @@
           <div class="card-body">
             <div class="metric-group">
               <label>Carga</label>
-              <div class="metric-value">{{form.carga_bateria}}<span class="metric-unit">%</span></div>
+              <div class="metric-value">{{form.carga_bateria}}<span class="metric-unit">V</span></div>
             </div>
             <div class="metric-group">
               <label>Nivel de Carga</label>
@@ -78,6 +78,36 @@
       </div>
 
     </div>
+
+    <!-- Gráfica de Evolución de Temperatura -->
+    <div class="row">
+      <div class="col-md-12">
+        <div class="dashboard-card card-grafica">
+          <h3 class="card-title">Evolución de Temperatura Ambiente</h3>
+          <div class="card-body">
+            <canvas id="temperaturaChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Gráfica de Estados del Climatizador -->
+    <div class="row">
+      <div class="col-md-12">
+        <div class="dashboard-card card-grafica-climatizador">
+          <h3 class="card-title">Historial de Estados del Climatizador</h3>
+          <div class="card-body">
+            <canvas id="climatizadorChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div>
 
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script src="{{ url_for('static', filename='js/graficas.js') }}"></script>
 {% endblock %}
