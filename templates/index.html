@@ -5,81 +5,109 @@
 
 {% block content %}
 <meta http-equiv="refresh" content="10">
-  <header class="bg-primary text-white">
+  <header class="header-dashboard">
     <div class="container text-center">
-      <h1>Bienvenido al Caso de Estudio - Termostato ISSE</h1>
-      <p class="lead">Para el curso de ISSE </p>
+      <h1>Dashboard Termostato ISSE</h1>
+      <p class="lead">Monitoreo en Tiempo Real</p>
     </div>
   </header>
 
-  <section id="ambiente">
-    <div class="container">
-      <div class="row">
-        <div class="col-lg-8 mx-auto">
-          <h2>Ambiente</h2>
-            <div class="row">
-                    <div class="col-sm-4">
-                      <div class="form-group">
-                            <label >Temperatura Ambiente</label>
-                             <input type="text" class="form-control"
-                                            placeholder="{{form.temperatura_ambiente}}"
-                                            readonly>
-                      </div>
-                    </div>
+  <div class="container dashboard-container">
+    <div class="row">
+
+      <!-- Card Ambiente -->
+      <div class="col-md-4">
+        <div class="dashboard-card card-ambiente">
+          <div class="card-icon">
+            <span class="glyphicon glyphicon-fire"></span>
+          </div>
+          <h3 class="card-title">Ambiente</h3>
+          <div class="card-body">
+            <div class="metric-group">
+              <label>Temperatura Actual</label>
+              <div class="metric-value">{{form.temperatura_ambiente}}<span class="metric-unit">°C</span></div>
+            </div>
+            <div class="metric-group">
+              <label>Temperatura Deseada</label>
+              <div class="metric-value">{{form.temperatura_deseada}}<span class="metric-unit">°C</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card Climatizador -->
+      <div class="col-md-4">
+        <div class="dashboard-card card-climatizador">
+          <div class="card-icon">
+            <span class="glyphicon glyphicon-refresh"></span>
+          </div>
+          <h3 class="card-title">Climatizador</h3>
+          <div class="card-body">
+            <div class="metric-group">
+              <label>Estado del Sistema</label>
+              <div class="metric-value estado-badge
+                {% if form.estado_climatizador == 'encendido' %}badge-encendido{% else %}badge-apagado{% endif %}">
+                {{form.estado_climatizador|upper}}
               </div>
-            <div class="row">
-                    <div class="col-sm-4">
-                      <div class="form-group">
-                            <label>Temperatura Deseada</label>
-                             <input type="text" class="form-control"
-                                            placeholder="{{form.temperatura_deseada}}"
-                                            readonly>
-                      </div>
-                    </div>
             </div>
+          </div>
+        </div>
       </div>
-      </div>
-    </div>
-  </section>
 
-  <section id="Climatizador" class="bg-light">
-    <div class="container">
-      <div class="row">
-        <div class="col-lg-8 mx-auto">
-          <h2>Climatizador</h2>
-          <div class="row">
-                    <div class="col-sm-4">
-                      <div class="form-group">
-                            <label>Estado</label>
-                             <input type="text" class="form-control"
-                                            placeholder="{{form.estado_climatizador}}"
-                                            readonly>
-                      </div>
-                    </div>
+      <!-- Card Batería -->
+      <div class="col-md-4">
+        <div class="dashboard-card card-bateria">
+          <div class="card-icon">
+            <span class="glyphicon glyphicon-flash"></span>
+          </div>
+          <h3 class="card-title">Batería</h3>
+          <div class="card-body">
+            <div class="metric-group">
+              <label>Carga</label>
+              <div class="metric-value">{{form.carga_bateria}}<span class="metric-unit">V</span></div>
             </div>
+            <div class="metric-group">
+              <label>Indicador de Carga</label>
+              <div class="metric-value nivel-badge
+                {% if form.indicador_bateria == 'normal' %}badge-normal{% else %}badge-bajo{% endif %}">
+                {{form.indicador_bateria|upper}}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Gráfica de Evolución de Temperatura -->
+    <div class="row">
+      <div class="col-md-12">
+        <div class="dashboard-card card-grafica">
+          <h3 class="card-title">Evolución de Temperatura Ambiente</h3>
+          <div class="card-body">
+            <canvas id="temperaturaChart"></canvas>
+          </div>
         </div>
       </div>
     </div>
-  </section>
 
-  <section id="bateria">
-    <div class="container">
-      <div class="row">
-        <div class="col-lg-8 mx-auto">
-          <h2>Batería</h2>
-          <div class="row">
-                    <div class="col-sm-4">
-                      <div class="form-group">
-                            <label>Carga</label>
-                             <input type="text" class="form-control"
-                                            placeholder="{{form.carga_bateria}}"
-                                            readonly>
-                      </div>
-                    </div>
-            </div>
+    <!-- Gráfica de Estados del Climatizador -->
+    <div class="row">
+      <div class="col-md-12">
+        <div class="dashboard-card card-grafica-climatizador">
+          <h3 class="card-title">Historial de Estados del Climatizador</h3>
+          <div class="card-body">
+            <canvas id="climatizadorChart"></canvas>
+          </div>
         </div>
       </div>
     </div>
-  </section>
 
+  </div>
+
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script src="{{ url_for('static', filename='js/graficas.js') }}"></script>
 {% endblock %}

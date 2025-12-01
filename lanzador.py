@@ -51,12 +51,14 @@ def index():
     datos_ambiente = obtener_dato_api('/termostato/temperatura_ambiente/')
     datos_deseada = obtener_dato_api('/termostato/temperatura_deseada/')
     datos_bateria = obtener_dato_api('/termostato/bateria/')
+    datos_indicador = obtener_dato_api('/termostato/indicador/')
     datos_climatizador = obtener_dato_api('/termostato/estado_climatizador/')
 
     # Asignar valores al formulario (con valores por defecto si hay error)
     formulario.temperatura_ambiente = datos_ambiente.get('temperatura_ambiente', 'N/A') if datos_ambiente else 'Error API'
     formulario.temperatura_deseada = datos_deseada.get('temperatura_deseada', 'N/A') if datos_deseada else 'Error API'
     formulario.carga_bateria = datos_bateria.get('carga_bateria', 'N/A') if datos_bateria else 'Error API'
+    formulario.indicador_bateria = datos_indicador.get('indicador', 'N/A') if datos_indicador else 'Error API'
     formulario.estado_climatizador = datos_climatizador.get('estado_climatizador', 'N/A') if datos_climatizador else 'Error API'
 
     return render_template("index.html", form=formulario)
