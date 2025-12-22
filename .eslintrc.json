@@ -1,0 +1,26 @@
+{
+  "env": {
+    "browser": true,
+    "es2021": true
+  },
+  "parserOptions": {
+    "ecmaVersion": "latest"
+  },
+  "globals": {
+    "Chart": "readonly",
+    "$": "readonly",
+    "jQuery": "readonly"
+  },
+  "rules": {
+    "no-unused-vars": "error",
+    "no-undef": "error",
+    "eqeqeq": "warn",
+    "no-var": "warn",
+    "prefer-const": "warn",
+    "no-console": "off",
+    "complexity": ["error", 10],
+    "max-depth": ["error", 4],
+    "max-lines-per-function": ["warn", 50],
+    "max-params": ["warn", 4]
+  }
+}
