@@ -35,5 +35,16 @@
     "output_dir": "quality/reports/"
   },
   "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cmd=$(cat | jq -r '.tool_input.command'); if echo \"$cmd\" | grep -q 'git commit'; then python quality/scripts/calculate_metrics.py . && python quality/scripts/calculate_web_metrics.py . && python quality/scripts/validate_gates.py quality/reports/quality_*.json || exit 2; fi"
+          }
+        ]
+      }
+    ]
   }
 }
