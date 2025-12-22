@@ -1,0 +1,50 @@
+{
+  "version": "1.0",
+  "project_name": "webapp_termostato",
+  "quality_gates": {
+    "max_complexity": 10,
+    "min_maintainability": 20,
+    "min_pylint_score": 8.0,
+    "max_function_lines": 50
+  },
+  "quality_gates_web": {
+    "html": {
+      "max_errors": 0,
+      "max_warnings": 5
+    },
+    "css": {
+      "max_errors": 0,
+      "max_warnings": 10
+    },
+    "javascript": {
+      "max_errors": 0,
+      "max_warnings": 10,
+      "max_complexity": 10
+    }
+  },
+  "metrics": {
+    "tools": {
+      "complexity": "radon cc",
+      "maintainability": "radon mi",
+      "size": "radon raw",
+      "linting": "pylint",
+      "html_lint": "htmlhint",
+      "css_lint": "stylelint",
+      "js_lint": "eslint"
+    },
+    "output_dir": "quality/reports/"
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cmd=$(cat | jq -r '.tool_input.command'); if echo \"$cmd\" | grep -q 'git commit'; then python quality/scripts/calculate_metrics.py . && python quality/scripts/calculate_web_metrics.py . && python quality/scripts/validate_gates.py quality/reports/quality_*.json || exit 2; fi"
+          }
+        ]
+      }
+    ]
+  }
+}

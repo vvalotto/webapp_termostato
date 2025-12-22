@@ -1,0 +1,20 @@
+# Dependencias para analisis de calidad web
+# Instalacion: npm install (ver package.json en raiz del proyecto)
+#
+# Herramientas utilizadas:
+# - htmlhint: Validacion HTML y accesibilidad
+# - stylelint: Linting CSS y buenas practicas
+# - eslint: Linting JavaScript y analisis de complejidad
+#
+# Nota: Estas herramientas se instalan via npm, no pip.
+# Ejecutar desde la raiz del proyecto:
+#
+#   npm install
+#
+# Para verificar instalacion:
+#
+#   npm list htmlhint stylelint eslint
+#
+# Para ejecutar analisis:
+#
+#   python quality/scripts/calculate_web_metrics.py .
