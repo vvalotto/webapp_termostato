@@ -98,8 +98,15 @@
           <div class="card-body">
             <div class="metric-group">
               <label>Temperatura Actual</label>
-              <div class="metric-value"><span id="valor-temp-ambiente">{{form.temperatura_ambiente}}</span><span class="metric-unit">°C</span></div>
+              <div class="metric-value">
+                <span id="valor-temp-ambiente">{{form.temperatura_ambiente}}</span><span class="metric-unit">°C</span>
+                <!-- WT-9: Indicador de tendencia -->
+                <span id="tendencia-flecha" class="tendencia-flecha"></span>
+                <span id="tendencia-icono" class="tendencia-icono"></span>
+              </div>
             </div>
+            <!-- WT-9: Texto descriptivo de tendencia -->
+            <div id="tendencia-texto" class="tendencia-texto"></div>
             <div class="metric-group">
               <label>Temperatura Deseada</label>
               <div class="metric-value"><span id="valor-temp-deseada">{{form.temperatura_deseada}}</span><span class="metric-unit">°C</span></div>
