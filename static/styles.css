@@ -263,3 +263,26 @@ body {
 #climatizadorChart {
     max-height: 400px;
 }
+
+/* Indicador de actualizacion automatica (WT-12) */
+.indicador-actualizacion {
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    font-size: 0.8em;
+    color: rgba(255, 255, 255, 0.7);
+    margin-left: 10px;
+}
+
+.indicador-actualizacion.visible {
+    opacity: 1;
+}
+
+/* Efecto visual cuando un valor cambia */
+.valor-actualizado {
+    animation: highlight 0.3s ease;
+}
+
+@keyframes highlight {
+    0% { background-color: rgba(40, 167, 69, 0.3); }
+    100% { background-color: transparent; }
+}
