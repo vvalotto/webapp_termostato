@@ -34,9 +34,9 @@ def obtener_estado_termostato():
     Obtiene todos los datos del termostato en una sola llamada al endpoint unificado.
 
     Returns:
-        tuple: (datos, timestamp) donde datos es el dict con todos los valores
-               o (None, None) si hay error y no hay cache disponible.
-               Si hay error pero existe cache, retorna los datos cacheados.
+        tuple: (datos, timestamp, from_cache) donde datos es el dict con todos los valores,
+               from_cache indica si son datos cacheados (backend no responde).
+               Retorna (None, None, False) si hay error y no hay cache disponible.
     """
     global ultima_respuesta_valida, ultimo_timestamp
     try:
@@ -47,10 +47,12 @@ def obtener_estado_termostato():
         # Cachear respuesta válida
         ultima_respuesta_valida = datos
         ultimo_timestamp = datetime.utcnow().isoformat()
-        return datos, ultimo_timestamp
+        return datos, ultimo_timestamp, False
     except requests.exceptions.RequestException:
         # Retornar cache si existe
-        return ultima_respuesta_valida, ultimo_timestamp
+        if ultima_respuesta_valida:
+            return ultima_respuesta_valida, ultimo_timestamp, True
+        return None, None, False
 
 
 @app.route("/")
@@ -59,7 +61,7 @@ def index():
     formulario = TermostatoForm()
 
     # Obtener todos los datos en una sola llamada
-    datos, timestamp = obtener_estado_termostato()
+    datos, timestamp, _ = obtener_estado_termostato()
 
     if datos:
         # Asignar valores al formulario desde el endpoint unificado
@@ -83,18 +85,20 @@ def index():
 def api_estado():
     """
     Endpoint JSON para obtener el estado del termostato.
-    Útil para actualización AJAX sin recargar la página (futuro WT-12).
+    Útil para actualización AJAX sin recargar la página (WT-12).
 
     Returns:
         JSON con los datos del termostato o error 503 si no hay conexión.
+        Incluye from_cache=True si los datos son cacheados (backend no responde).
     """
-    datos, timestamp = obtener_estado_termostato()
+    datos, timestamp, from_cache = obtener_estado_termostato()
 
     if datos:
         return jsonify({
             'success': True,
             'data': datos,
-            'timestamp': timestamp
+            'timestamp': timestamp,
+            'from_cache': from_cache
         })
 
     return jsonify({
