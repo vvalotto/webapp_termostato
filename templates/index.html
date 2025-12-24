@@ -7,7 +7,13 @@
   <header class="header-dashboard">
     <div class="container text-center">
       <h1>Dashboard Termostato ISSE</h1>
-      <p class="lead">Monitoreo en Tiempo Real <span id="indicador-actualizacion" class="indicador-actualizacion">Actualizando...</span></p>
+      <p class="lead">Monitoreo en Tiempo Real</p>
+      <!-- WT-10: Estado de conexión visible -->
+      <div id="estado-conexion" class="estado-conexion online">
+        <span id="icono-estado" class="glyphicon glyphicon-refresh icono-estado"></span>
+        <span id="texto-estado">En línea</span>
+        <span id="timestamp-estado" class="timestamp-estado">Actualizado hace 0s</span>
+      </div>
     </div>
   </header>
 
