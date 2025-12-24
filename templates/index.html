@@ -17,6 +17,71 @@
     </div>
   </header>
 
+  <!-- WT-8: Seccion explicativa colapsable -->
+  <div class="container">
+    <div class="panel panel-ayuda">
+      <div class="panel-heading">
+        <h4 class="panel-title">
+          <a data-toggle="collapse" href="#seccion-ayuda" class="ayuda-toggle">
+            <span class="glyphicon glyphicon-question-sign"></span>
+            ¿Como funciona?
+            <span class="glyphicon glyphicon-chevron-down toggle-icon"></span>
+          </a>
+        </h4>
+      </div>
+      <div id="seccion-ayuda" class="panel-collapse collapse">
+        <div class="panel-body">
+          <div class="row">
+            <!-- Explicacion Climatizador -->
+            <div class="col-md-6">
+              <h5 class="leyenda-titulo">
+                <span class="glyphicon glyphicon-refresh"></span> Estados del Climatizador
+              </h5>
+              <ul class="leyenda-lista">
+                <li>
+                  <span class="leyenda-icono estado-apagado"><span class="glyphicon glyphicon-off"></span></span>
+                  <strong>APAGADO</strong> - Sistema en espera, temperatura en rango
+                </li>
+                <li>
+                  <span class="leyenda-icono estado-encendido"><span class="glyphicon glyphicon-ok"></span></span>
+                  <strong>ENCENDIDO</strong> - Sistema activo
+                </li>
+                <li>
+                  <span class="leyenda-icono estado-enfriando"><span class="glyphicon glyphicon-asterisk"></span></span>
+                  <strong>ENFRIANDO</strong> - Aire acondicionado activo
+                </li>
+                <li>
+                  <span class="leyenda-icono estado-calentando"><span class="glyphicon glyphicon-fire"></span></span>
+                  <strong>CALENTANDO</strong> - Calefaccion activa
+                </li>
+              </ul>
+            </div>
+            <!-- Explicacion Bateria -->
+            <div class="col-md-6">
+              <h5 class="leyenda-titulo">
+                <span class="glyphicon glyphicon-flash"></span> Niveles de Bateria
+              </h5>
+              <ul class="leyenda-lista">
+                <li>
+                  <span class="leyenda-icono bateria-normal"><span class="glyphicon glyphicon-ok-circle"></span></span>
+                  <strong>NORMAL</strong> - Carga suficiente (&gt;3.5V)
+                </li>
+                <li>
+                  <span class="leyenda-icono bateria-bajo"><span class="glyphicon glyphicon-warning-sign"></span></span>
+                  <strong>BAJO</strong> - Considerar recarga (2.5-3.5V)
+                </li>
+                <li>
+                  <span class="leyenda-icono bateria-critico"><span class="glyphicon glyphicon-exclamation-sign"></span></span>
+                  <strong>CRITICO</strong> - Riesgo de apagado (&lt;2.5V)
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div class="container dashboard-container">
     <div class="row">
 
@@ -26,7 +91,10 @@
           <div class="card-icon">
             <span class="glyphicon glyphicon-fire"></span>
           </div>
-          <h3 class="card-title">Ambiente</h3>
+          <h3 class="card-title" data-toggle="tooltip" data-placement="top"
+              title="Temperatura actual del ambiente y objetivo configurado">
+            Ambiente <span class="glyphicon glyphicon-info-sign tooltip-icon"></span>
+          </h3>
           <div class="card-body">
             <div class="metric-group">
               <label>Temperatura Actual</label>
@@ -46,7 +114,10 @@
           <div class="card-icon">
             <span class="glyphicon glyphicon-refresh"></span>
           </div>
-          <h3 class="card-title">Climatizador</h3>
+          <h3 class="card-title" data-toggle="tooltip" data-placement="top"
+              title="Estado actual del sistema de climatizacion">
+            Climatizador <span class="glyphicon glyphicon-info-sign tooltip-icon"></span>
+          </h3>
           <div class="card-body">
             <div class="metric-group">
               <label>Estado del Sistema</label>
@@ -65,7 +136,10 @@
           <div class="card-icon">
             <span class="glyphicon glyphicon-flash"></span>
           </div>
-          <h3 class="card-title">Batería</h3>
+          <h3 class="card-title" data-toggle="tooltip" data-placement="top"
+              title="Nivel de carga de la bateria del termostato">
+            Bateria <span class="glyphicon glyphicon-info-sign tooltip-icon"></span>
+          </h3>
           <div class="card-body">
             <div class="metric-group">
               <label>Carga</label>

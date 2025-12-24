@@ -194,6 +194,11 @@ function iniciarActualizacion() {
     // WT-10: Configurar intervalo para actualizar timestamp cada segundo
     timestampIntervalId = setInterval(actualizarTimestamp, 1000);
 
+    // WT-8: Inicializar tooltips de Bootstrap
+    if (typeof $ !== 'undefined' && $.fn.tooltip) {
+        $('[data-toggle="tooltip"]').tooltip();
+    }
+
     console.log('Actualizacion automatica iniciada (intervalo: ' + INTERVALO_MS + 'ms)');
 }
 
