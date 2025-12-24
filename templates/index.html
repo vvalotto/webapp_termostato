@@ -4,11 +4,10 @@
 {% block title %}Termostato{% endblock %}
 
 {% block content %}
-<meta http-equiv="refresh" content="10">
   <header class="header-dashboard">
     <div class="container text-center">
       <h1>Dashboard Termostato ISSE</h1>
-      <p class="lead">Monitoreo en Tiempo Real</p>
+      <p class="lead">Monitoreo en Tiempo Real <span id="indicador-actualizacion" class="indicador-actualizacion">Actualizando...</span></p>
     </div>
   </header>
 
@@ -25,11 +24,11 @@
           <div class="card-body">
             <div class="metric-group">
               <label>Temperatura Actual</label>
-              <div class="metric-value">{{form.temperatura_ambiente}}<span class="metric-unit">°C</span></div>
+              <div class="metric-value"><span id="valor-temp-ambiente">{{form.temperatura_ambiente}}</span><span class="metric-unit">°C</span></div>
             </div>
             <div class="metric-group">
               <label>Temperatura Deseada</label>
-              <div class="metric-value">{{form.temperatura_deseada}}<span class="metric-unit">°C</span></div>
+              <div class="metric-value"><span id="valor-temp-deseada">{{form.temperatura_deseada}}</span><span class="metric-unit">°C</span></div>
             </div>
           </div>
         </div>
@@ -45,7 +44,7 @@
           <div class="card-body">
             <div class="metric-group">
               <label>Estado del Sistema</label>
-              <div class="metric-value estado-badge
+              <div id="badge-climatizador" class="metric-value estado-badge
                 {% if form.estado_climatizador == 'encendido' %}badge-encendido{% else %}badge-apagado{% endif %}">
                 {{form.estado_climatizador|upper}}
               </div>
@@ -64,11 +63,11 @@
           <div class="card-body">
             <div class="metric-group">
               <label>Carga</label>
-              <div class="metric-value">{{form.carga_bateria}}<span class="metric-unit">V</span></div>
+              <div class="metric-value"><span id="valor-bateria">{{form.carga_bateria}}</span><span class="metric-unit">V</span></div>
             </div>
             <div class="metric-group">
               <label>Indicador de Carga</label>
-              <div class="metric-value nivel-badge
+              <div id="badge-indicador" class="metric-value nivel-badge
                 {% if form.indicador_bateria == 'normal' %}badge-normal{% else %}badge-bajo{% endif %}">
                 {{form.indicador_bateria|upper}}
               </div>
@@ -110,4 +109,5 @@
 {% block scripts %}
 {{ super() }}
 <script src="{{ url_for('static', filename='js/graficas.js') }}"></script>
+<script src="{{ url_for('static', filename='js/actualizador.js') }}"></script>
 {% endblock %}
