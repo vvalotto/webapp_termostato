@@ -155,14 +155,19 @@
         </div>
       </div>
 
-      <!-- Card Batería -->
+      <!-- Card Batería - WT-18: Alerta visual de bateria baja -->
       <div class="col-md-4">
-        <div class="dashboard-card card-bateria">
+        <div id="card-bateria" class="dashboard-card card-bateria bateria-nivel-{{form.indicador_bateria|lower}}"
+             data-toggle="tooltip" data-placement="top" data-html="true"
+             title="{% if form.indicador_bateria|lower == 'normal' %}Bateria con carga suficiente{% elif form.indicador_bateria|lower == 'bajo' %}Bateria baja - Considere recargar pronto{% else %}Bateria critica - Riesgo de apagado inminente{% endif %}">
           <div class="card-icon">
             <span class="glyphicon glyphicon-flash"></span>
           </div>
-          <h3 class="card-title" data-toggle="tooltip" data-placement="top"
-              title="Nivel de carga de la bateria del termostato">
+          <!-- WT-18: Icono de advertencia para BAJO y CRITICO -->
+          <span id="icono-alerta-bateria" class="icono-alerta-bateria {% if form.indicador_bateria|lower == 'normal' %}oculto{% endif %}">
+            <span class="glyphicon glyphicon-warning-sign"></span>
+          </span>
+          <h3 class="card-title">
             Bateria <span class="glyphicon glyphicon-info-sign tooltip-icon"></span>
           </h3>
           <div class="card-body">
@@ -173,7 +178,7 @@
             <div class="metric-group">
               <label>Indicador de Carga</label>
               <div id="badge-indicador" class="metric-value nivel-badge
-                {% if form.indicador_bateria == 'normal' %}badge-normal{% else %}badge-bajo{% endif %}">
+                {% if form.indicador_bateria|lower == 'normal' %}badge-normal{% elif form.indicador_bateria|lower == 'bajo' %}badge-bajo{% else %}badge-critico{% endif %}">
                 {{form.indicador_bateria|upper}}
               </div>
             </div>

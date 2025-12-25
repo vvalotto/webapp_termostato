@@ -61,6 +61,40 @@ function actualizarBadge(elementId, valor, claseBase) {
 }
 
 /**
+ * WT-18: Configuracion de tooltips segun nivel de bateria
+ */
+const TOOLTIPS_BATERIA = {
+    normal: 'Bateria con carga suficiente',
+    bajo: 'Bateria baja - Considere recargar pronto',
+    critico: 'Bateria critica - Riesgo de apagado inminente'
+};
+
+/**
+ * WT-18: Actualiza la card de bateria segun el nivel del indicador
+ */
+function actualizarCardBateria(indicador) {
+    const card = document.getElementById('card-bateria');
+    const iconoAlerta = document.getElementById('icono-alerta-bateria');
+    if (!card) return;
+
+    const nivel = indicador.toLowerCase();
+
+    // Actualizar clase de nivel de la card
+    card.classList.remove('bateria-nivel-normal', 'bateria-nivel-bajo', 'bateria-nivel-critico');
+    card.classList.add('bateria-nivel-' + nivel);
+
+    // Mostrar/ocultar icono de alerta
+    if (iconoAlerta) {
+        iconoAlerta.classList.toggle('oculto', nivel === 'normal');
+    }
+
+    // Actualizar tooltip
+    if (typeof $ !== 'undefined' && $.fn.tooltip) {
+        $(card).attr('data-original-title', TOOLTIPS_BATERIA[nivel] || '').tooltip('fixTitle');
+    }
+}
+
+/**
  * WT-10: Calcula el tiempo transcurrido en formato legible
  */
 function tiempoTranscurrido(timestamp) {
@@ -388,6 +422,9 @@ async function actualizarDatos() {
             // Actualizar badges de estado
             actualizarBadge('badge-climatizador', datos.estado_climatizador, 'estado-badge');
             actualizarBadge('badge-indicador', datos.indicador, 'nivel-badge');
+
+            // WT-18: Actualizar card de bateria segun nivel
+            actualizarCardBateria(datos.indicador);
 
             // Actualizar graficas (si existen las funciones de graficas.js)
             if (typeof actualizarGraficaTemperatura === 'function') {
