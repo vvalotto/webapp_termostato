@@ -443,6 +443,19 @@ body {
     100% { background-color: transparent; }
 }
 
+/* WT-21: Estilos para valores invalidos */
+.valor-invalido {
+    color: #e74c3c !important;
+    font-style: italic;
+}
+
+.badge-invalido {
+    background: linear-gradient(135deg, #95a5a6, #7f8c8d);
+    color: white;
+    box-shadow: 0 4px 15px rgba(149, 165, 166, 0.4);
+    font-style: italic;
+}
+
 /* WT-8: Leyenda explicativa del funcionamiento */
 
 /* Panel de ayuda colapsable */

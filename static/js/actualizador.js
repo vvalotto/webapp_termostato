@@ -19,6 +19,70 @@ let estadoAnterior = 'online';
 let bannerCerradoManualmente = false;
 
 /**
+ * WT-21: Reglas de validacion para cada campo de la API
+ */
+const REGLAS_VALIDACION = {
+    temperatura_ambiente: { tipo: 'number', min: 0, max: 50 },
+    temperatura_deseada: { tipo: 'number', min: 15, max: 30 },
+    carga_bateria: { tipo: 'number', min: 0, max: 5 },
+    indicador: { tipo: 'enum', valores: ['NORMAL', 'BAJO', 'CRITICO'] },
+    estado_climatizador: { tipo: 'enum', valores: ['apagado', 'encendido', 'enfriando', 'calentando'] }
+};
+
+/**
+ * WT-21: Valida un campo segun sus reglas
+ * @returns {Object} {valido: boolean, valor: any, error: string|null}
+ */
+function validarCampo(campo, valor) {
+    const regla = REGLAS_VALIDACION[campo];
+    if (!regla) {
+        return { valido: true, valor: valor, error: null };
+    }
+
+    // Validar tipo
+    if (regla.tipo === 'number') {
+        if (typeof valor !== 'number' || isNaN(valor)) {
+            console.warn('WT-21: Campo "' + campo + '" tipo invalido. Esperado: number, Recibido:', typeof valor, valor);
+            return { valido: false, valor: 'Error', error: 'tipo_invalido' };
+        }
+        if (valor < regla.min || valor > regla.max) {
+            console.warn('WT-21: Campo "' + campo + '" fuera de rango [' + regla.min + '-' + regla.max + ']. Valor:', valor);
+            return { valido: false, valor: 'N/A', error: 'fuera_de_rango' };
+        }
+    } else if (regla.tipo === 'enum') {
+        const valorNormalizado = String(valor).toUpperCase();
+        const valoresUpper = regla.valores.map(function(v) { return v.toUpperCase(); });
+        if (valoresUpper.indexOf(valorNormalizado) === -1) {
+            console.warn('WT-21: Campo "' + campo + '" valor invalido. Esperado:', regla.valores, 'Recibido:', valor);
+            return { valido: false, valor: 'Error', error: 'valor_invalido' };
+        }
+    }
+
+    return { valido: true, valor: valor, error: null };
+}
+
+/**
+ * WT-21: Valida todos los datos recibidos de la API
+ * @returns {Object} Datos validados con valores corregidos si es necesario
+ */
+function validarDatos(datos) {
+    const datosValidados = {};
+    let hayErrores = false;
+
+    for (const campo in REGLAS_VALIDACION) {
+        if (REGLAS_VALIDACION.hasOwnProperty(campo)) {
+            const resultado = validarCampo(campo, datos[campo]);
+            datosValidados[campo] = resultado.valor;
+            if (!resultado.valido) {
+                hayErrores = true;
+            }
+        }
+    }
+
+    return { datos: datosValidados, hayErrores: hayErrores };
+}
+
+/**
  * Obtiene el estado del termostato desde el endpoint /api/estado
  */
 async function obtenerEstado() {
@@ -28,13 +92,18 @@ async function obtenerEstado() {
 
 /**
  * Actualiza un valor en el DOM si ha cambiado
+ * WT-21: Marca valores invalidos con clase especial
  */
 function actualizarValor(elementId, valor, sufijo = '') {
     const elemento = document.getElementById(elementId);
     if (elemento) {
         const valorFormateado = valor + sufijo;
+        const esInvalido = (valor === 'N/A' || valor === 'Error');
+
         if (elemento.textContent !== valorFormateado) {
             elemento.textContent = valorFormateado;
+            // WT-21: Marcar si es valor invalido
+            elemento.classList.toggle('valor-invalido', esInvalido);
             // Efecto visual de cambio
             elemento.classList.add('valor-actualizado');
             setTimeout(() => elemento.classList.remove('valor-actualizado'), 300);
@@ -44,15 +113,22 @@ function actualizarValor(elementId, valor, sufijo = '') {
 
 /**
  * Actualiza un badge de estado (climatizador o indicador bateria)
+ * WT-21: Maneja valores invalidos
  */
 function actualizarBadge(elementId, valor, claseBase) {
     const elemento = document.getElementById(elementId);
     if (elemento) {
-        const valorUpper = valor.toUpperCase();
-        if (elemento.textContent !== valorUpper) {
-            elemento.textContent = valorUpper;
+        const esInvalido = (valor === 'N/A' || valor === 'Error');
+        const valorMostrar = esInvalido ? valor : valor.toUpperCase();
+
+        if (elemento.textContent !== valorMostrar) {
+            elemento.textContent = valorMostrar;
             // Actualizar clase del badge
-            elemento.className = claseBase + ' badge-' + valor.toLowerCase();
+            if (esInvalido) {
+                elemento.className = claseBase + ' badge-invalido';
+            } else {
+                elemento.className = claseBase + ' badge-' + valor.toLowerCase();
+            }
             // Efecto visual de cambio
             elemento.classList.add('valor-actualizado');
             setTimeout(() => elemento.classList.remove('valor-actualizado'), 300);
@@ -402,70 +478,72 @@ function actualizarIndicadorTendencia(tempActual, tempDeseada, estadoClimatizado
 }
 
 /**
+ * WT-21: Procesa y muestra los datos recibidos de la API
+ */
+function procesarDatosRecibidos(datosOriginales) {
+    const validacion = validarDatos(datosOriginales);
+    const datos = validacion.datos;
+
+    // Actualizar valores numericos (con datos validados)
+    actualizarValor('valor-temp-ambiente', datos.temperatura_ambiente, '');
+    actualizarValor('valor-temp-deseada', datos.temperatura_deseada, '');
+    actualizarValor('valor-bateria', datos.carga_bateria, '');
+
+    // Actualizar badges de estado (con datos validados)
+    actualizarBadge('badge-climatizador', datos.estado_climatizador, 'estado-badge');
+    actualizarBadge('badge-indicador', datos.indicador, 'nivel-badge');
+
+    // WT-18: Actualizar card de bateria (solo si indicador es valido)
+    if (typeof datos.indicador === 'string' && datos.indicador !== 'Error') {
+        actualizarCardBateria(datosOriginales.indicador);
+    }
+
+    // Actualizar graficas y tendencia solo si los datos son validos
+    if (!validacion.hayErrores) {
+        if (typeof actualizarGraficaTemperatura === 'function') {
+            actualizarGraficaTemperatura();
+        }
+        if (typeof actualizarGraficaClimatizador === 'function') {
+            actualizarGraficaClimatizador();
+        }
+        actualizarIndicadorTendencia(
+            datosOriginales.temperatura_ambiente,
+            datosOriginales.temperatura_deseada,
+            datosOriginales.estado_climatizador
+        );
+    }
+}
+
+/**
+ * WT-19: Maneja el caso de fallo de conexion
+ */
+function manejarFalloConexion() {
+    if (!ultimaActualizacion) {
+        ultimaActualizacion = Date.now();
+    }
+    actualizarEstadoConexion('offline');
+    actualizarTimestamp();
+}
+
+/**
  * Funcion principal que obtiene datos y actualiza el DOM
  */
 async function actualizarDatos() {
     try {
-        // WT-10: Mostrar icono de actualizacion
         mostrarActualizando(true);
-
         const resultado = await obtenerEstado();
 
         if (resultado.success) {
-            const datos = resultado.data;
-
-            // Actualizar valores numericos
-            actualizarValor('valor-temp-ambiente', datos.temperatura_ambiente, '');
-            actualizarValor('valor-temp-deseada', datos.temperatura_deseada, '');
-            actualizarValor('valor-bateria', datos.carga_bateria, '');
-
-            // Actualizar badges de estado
-            actualizarBadge('badge-climatizador', datos.estado_climatizador, 'estado-badge');
-            actualizarBadge('badge-indicador', datos.indicador, 'nivel-badge');
-
-            // WT-18: Actualizar card de bateria segun nivel
-            actualizarCardBateria(datos.indicador);
-
-            // Actualizar graficas (si existen las funciones de graficas.js)
-            if (typeof actualizarGraficaTemperatura === 'function') {
-                actualizarGraficaTemperatura();
-            }
-            if (typeof actualizarGraficaClimatizador === 'function') {
-                actualizarGraficaClimatizador();
-            }
-
-            // WT-9: Actualizar indicador de tendencia
-            actualizarIndicadorTendencia(
-                datos.temperatura_ambiente,
-                datos.temperatura_deseada,
-                datos.estado_climatizador
-            );
-
-            // WT-10: Marcar estado segun si son datos frescos o cacheados
+            procesarDatosRecibidos(resultado.data);
             ultimaActualizacion = Date.now();
-            if (resultado.from_cache) {
-                actualizarEstadoConexion('offline');
-            } else {
-                actualizarEstadoConexion('online');
-            }
+            actualizarEstadoConexion(resultado.from_cache ? 'offline' : 'online');
             actualizarTimestamp();
         } else {
-            // WT-19: Respuesta sin exito (API respondio pero con error)
-            if (!ultimaActualizacion) {
-                ultimaActualizacion = Date.now();
-            }
-            actualizarEstadoConexion('offline');
-            actualizarTimestamp();
+            manejarFalloConexion();
         }
     } catch (error) {
         console.error('Error actualizando datos:', error);
-        // WT-19: Si nunca hubo conexion exitosa, marcar timestamp inicial
-        if (!ultimaActualizacion) {
-            ultimaActualizacion = Date.now();
-        }
-        // WT-10: Marcar como offline
-        actualizarEstadoConexion('offline');
-        actualizarTimestamp();
+        manejarFalloConexion();
     } finally {
         // WT-10: Ocultar icono de actualizacion
         mostrarActualizando(false);
