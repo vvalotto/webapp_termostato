@@ -154,27 +154,121 @@ body {
     box-shadow: 0 4px 15px rgba(149, 165, 166, 0.4);
 }
 
+/* WT-18: Badges de nivel de bateria */
 .badge-normal {
-    background: linear-gradient(135deg, #3498db, #2980b9);
+    background: linear-gradient(135deg, #2ecc71, #27ae60);
     color: white;
-    box-shadow: 0 4px 15px rgba(52, 152, 219, 0.4);
+    box-shadow: 0 4px 15px rgba(46, 204, 113, 0.4);
 }
 
 .badge-bajo {
+    background: linear-gradient(135deg, #f39c12, #e67e22);
+    color: white;
+    box-shadow: 0 4px 15px rgba(243, 156, 18, 0.4);
+    animation: pulso-sutil 2s infinite;
+}
+
+.badge-critico {
     background: linear-gradient(135deg, #e74c3c, #c0392b);
     color: white;
     box-shadow: 0 4px 15px rgba(231, 76, 60, 0.4);
-    animation: pulse 2s infinite;
+    animation: pulso-intenso 1s infinite;
 }
 
-/* Animación de pulso para batería baja */
-@keyframes pulse {
-    0%, 100% {
-        transform: scale(1);
-    }
-    50% {
-        transform: scale(1.05);
-    }
+/* WT-18: Card bateria segun nivel */
+.bateria-nivel-normal {
+    border-left: 5px solid #2ecc71;
+}
+
+.bateria-nivel-normal .card-title {
+    color: #2ecc71;
+    border-color: #2ecc71;
+}
+
+.bateria-nivel-normal .card-icon {
+    color: #2ecc71;
+}
+
+.bateria-nivel-bajo {
+    border-left: 5px solid #f39c12;
+    animation: pulso-card-sutil 2s infinite;
+}
+
+.bateria-nivel-bajo .card-title {
+    color: #f39c12;
+    border-color: #f39c12;
+}
+
+.bateria-nivel-bajo .card-icon {
+    color: #f39c12;
+}
+
+.bateria-nivel-critico {
+    border-left: 5px solid #e74c3c;
+    animation: pulso-card-intenso 1s infinite;
+}
+
+.bateria-nivel-critico .card-title {
+    color: #e74c3c;
+    border-color: #e74c3c;
+}
+
+.bateria-nivel-critico .card-icon {
+    color: #e74c3c;
+}
+
+/* WT-18: Icono de alerta de bateria */
+.icono-alerta-bateria {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    font-size: 1.5em;
+    z-index: 10;
+}
+
+.bateria-nivel-bajo .icono-alerta-bateria {
+    color: #f39c12;
+    animation: pulso-icono-sutil 2s infinite;
+}
+
+.bateria-nivel-critico .icono-alerta-bateria {
+    color: #e74c3c;
+    animation: pulso-icono-intenso 0.5s infinite;
+}
+
+.icono-alerta-bateria.oculto {
+    display: none;
+}
+
+/* WT-18: Animaciones de pulso */
+@keyframes pulso-sutil {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.03); opacity: 0.9; }
+}
+
+@keyframes pulso-intenso {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.08); opacity: 0.85; }
+}
+
+@keyframes pulso-card-sutil {
+    0%, 100% { box-shadow: 0 10px 30px rgba(243, 156, 18, 0.2); }
+    50% { box-shadow: 0 10px 40px rgba(243, 156, 18, 0.4); }
+}
+
+@keyframes pulso-card-intenso {
+    0%, 100% { box-shadow: 0 10px 30px rgba(231, 76, 60, 0.3); }
+    50% { box-shadow: 0 10px 50px rgba(231, 76, 60, 0.6); }
+}
+
+@keyframes pulso-icono-sutil {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+}
+
+@keyframes pulso-icono-intenso {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.7; transform: scale(1.2); }
 }
 
 /* Responsive - Tablets */
