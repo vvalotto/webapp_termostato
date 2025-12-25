@@ -14,6 +14,9 @@ const UMBRAL_OBSOLETO_MS = 30000; // 30 segundos para considerar datos obsoletos
 let intervalId = null;
 let timestampIntervalId = null;
 let ultimaActualizacion = null;
+// WT-19: Estado anterior para detectar reconexion
+let estadoAnterior = 'online';
+let bannerCerradoManualmente = false;
 
 /**
  * Obtiene el estado del termostato desde el endpoint /api/estado
@@ -71,44 +74,139 @@ function tiempoTranscurrido(timestamp) {
 }
 
 /**
+ * WT-19: Muestra u oculta el banner de perdida de conexion
+ */
+function actualizarBannerConexion(mostrar) {
+    const banner = document.getElementById('banner-conexion');
+    const bannerTiempo = document.getElementById('banner-tiempo');
+    if (!banner) return;
+
+    if (mostrar && !bannerCerradoManualmente) {
+        banner.classList.remove('oculto');
+        document.body.classList.add('banner-visible');
+        if (bannerTiempo && ultimaActualizacion) {
+            bannerTiempo.textContent = 'Ultimo dato: ' + tiempoTranscurrido(ultimaActualizacion);
+        }
+    } else {
+        banner.classList.add('oculto');
+        document.body.classList.remove('banner-visible');
+    }
+}
+
+/**
+ * WT-19: Muestra notificacion de reconexion
+ */
+function mostrarNotificacionReconexion() {
+    const notificacion = document.getElementById('notificacion-reconexion');
+    if (!notificacion) return;
+
+    notificacion.classList.remove('oculto');
+    // Ocultar automaticamente despues de 3 segundos
+    setTimeout(function() {
+        notificacion.classList.add('oculto');
+    }, 3000);
+}
+
+/**
+ * WT-19: Inicializa el boton de cerrar del banner
+ */
+function inicializarBannerCerrar() {
+    const botonCerrar = document.querySelector('.banner-cerrar');
+    if (botonCerrar) {
+        botonCerrar.addEventListener('click', function() {
+            bannerCerradoManualmente = true;
+            actualizarBannerConexion(false);
+        });
+    }
+}
+
+/**
+ * WT-19: Configuracion visual para cada estado de conexion
+ */
+const ESTADOS_CONEXION = {
+    online: {
+        clase: 'online',
+        icono: 'glyphicon-ok',
+        texto: 'En línea',
+        datosObsoletos: false,
+        mostrarBanner: false
+    },
+    offline: {
+        clase: 'offline',
+        icono: 'glyphicon-remove',
+        texto: 'Sin conexión',
+        datosObsoletos: true,
+        mostrarBanner: true
+    },
+    obsoleto: {
+        clase: 'obsoleto',
+        icono: 'glyphicon-warning-sign',
+        texto: 'Datos desactualizados',
+        datosObsoletos: true,
+        mostrarBanner: true
+    }
+};
+
+/**
+ * WT-19: Detecta y maneja la reconexion
+ */
+function manejarReconexion(estadoNuevo) {
+    const eraDesconectado = (estadoAnterior === 'offline' || estadoAnterior === 'obsoleto');
+    const ahoraConectado = (estadoNuevo === 'online');
+    if (eraDesconectado && ahoraConectado) {
+        mostrarNotificacionReconexion();
+        bannerCerradoManualmente = false;
+    }
+}
+
+/**
  * WT-10: Actualiza el indicador de estado de conexion
+ * WT-19: Gestiona banner y notificaciones de reconexion
  */
 function actualizarEstadoConexion(estado) {
     const contenedor = document.getElementById('estado-conexion');
     const icono = document.getElementById('icono-estado');
     const texto = document.getElementById('texto-estado');
     const dashboardContainer = document.querySelector('.dashboard-container');
+    const config = ESTADOS_CONEXION[estado];
 
-    if (!contenedor || !icono || !texto) return;
+    if (!contenedor || !icono || !texto || !config) return;
+
+    manejarReconexion(estado);
 
     // Remover clases previas
     contenedor.classList.remove('online', 'offline', 'obsoleto');
     icono.classList.remove('glyphicon-ok', 'glyphicon-remove', 'glyphicon-warning-sign');
 
-    if (estado === 'online') {
-        contenedor.classList.add('online');
-        icono.classList.add('glyphicon-ok');
-        texto.textContent = 'En línea';
-        if (dashboardContainer) dashboardContainer.classList.remove('datos-obsoletos');
-    } else if (estado === 'offline') {
-        contenedor.classList.add('offline');
-        icono.classList.add('glyphicon-remove');
-        texto.textContent = 'Sin conexión';
-    } else if (estado === 'obsoleto') {
-        contenedor.classList.add('obsoleto');
-        icono.classList.add('glyphicon-warning-sign');
-        texto.textContent = 'Datos desactualizados';
-        if (dashboardContainer) dashboardContainer.classList.add('datos-obsoletos');
+    // Aplicar nueva configuracion
+    contenedor.classList.add(config.clase);
+    icono.classList.add(config.icono);
+    texto.textContent = config.texto;
+
+    if (dashboardContainer) {
+        dashboardContainer.classList.toggle('datos-obsoletos', config.datosObsoletos);
     }
+    actualizarBannerConexion(config.mostrarBanner);
+
+    estadoAnterior = estado;
 }
 
 /**
  * WT-10: Actualiza el timestamp mostrado
+ * WT-19: Actualiza tambien el tiempo en el banner
  */
 function actualizarTimestamp() {
     const timestampEl = document.getElementById('timestamp-estado');
+    const bannerTiempo = document.getElementById('banner-tiempo');
+
     if (timestampEl && ultimaActualizacion) {
-        timestampEl.textContent = 'Actualizado ' + tiempoTranscurrido(ultimaActualizacion);
+        const textoTiempo = tiempoTranscurrido(ultimaActualizacion);
+        timestampEl.textContent = 'Actualizado ' + textoTiempo;
+
+        // WT-19: Actualizar tiempo en el banner si esta visible
+        if (bannerTiempo) {
+            bannerTiempo.textContent = 'Ultimo dato: ' + textoTiempo;
+        }
 
         // Verificar si los datos estan obsoletos (> 30s)
         const tiempoSinActualizar = Date.now() - ultimaActualizacion;
@@ -314,11 +412,23 @@ async function actualizarDatos() {
                 actualizarEstadoConexion('online');
             }
             actualizarTimestamp();
+        } else {
+            // WT-19: Respuesta sin exito (API respondio pero con error)
+            if (!ultimaActualizacion) {
+                ultimaActualizacion = Date.now();
+            }
+            actualizarEstadoConexion('offline');
+            actualizarTimestamp();
         }
     } catch (error) {
         console.error('Error actualizando datos:', error);
+        // WT-19: Si nunca hubo conexion exitosa, marcar timestamp inicial
+        if (!ultimaActualizacion) {
+            ultimaActualizacion = Date.now();
+        }
         // WT-10: Marcar como offline
         actualizarEstadoConexion('offline');
+        actualizarTimestamp();
     } finally {
         // WT-10: Ocultar icono de actualizacion
         mostrarActualizando(false);
@@ -329,11 +439,13 @@ async function actualizarDatos() {
  * Inicia el ciclo de actualizacion automatica
  */
 function iniciarActualizacion() {
-    // WT-10: Marcar timestamp inicial (datos vienen del servidor)
-    ultimaActualizacion = Date.now();
-    actualizarEstadoConexion('online');
+    // WT-19: Inicializar boton de cerrar del banner
+    inicializarBannerCerrar();
 
-    // Configurar intervalo de datos (la primera carga ya tiene datos del servidor)
+    // WT-19: Verificar conexion inmediatamente al iniciar
+    actualizarDatos();
+
+    // Configurar intervalo de datos
     intervalId = setInterval(actualizarDatos, INTERVALO_MS);
 
     // WT-10: Configurar intervalo para actualizar timestamp cada segundo

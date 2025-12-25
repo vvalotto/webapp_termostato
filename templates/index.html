@@ -4,6 +4,24 @@
 {% block title %}Termostato{% endblock %}
 
 {% block content %}
+  <!-- WT-19: Banner de alerta de perdida de conexion -->
+  <div id="banner-conexion" class="banner-conexion oculto">
+    <div class="container">
+      <span class="glyphicon glyphicon-warning-sign banner-icono"></span>
+      <span class="banner-mensaje">Sin conexion con el servidor</span>
+      <span id="banner-tiempo" class="banner-tiempo"></span>
+      <button type="button" class="close banner-cerrar" aria-label="Cerrar">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- WT-19: Notificacion de reconexion -->
+  <div id="notificacion-reconexion" class="notificacion-reconexion oculto">
+    <span class="glyphicon glyphicon-ok-circle"></span>
+    <span>Conexion restablecida</span>
+  </div>
+
   <header class="header-dashboard">
     <div class="container text-center">
       <h1>Dashboard Termostato ISSE</h1>
