@@ -1,0 +1,221 @@
+/**
+ * Estilos de estado de conexion
+ * WT-10: Estado de conexion visible
+ * WT-19: Alerta visual de perdida de conexion
+ * WT-22: Estado reintentando
+ * WT-23: Refactorizacion modular CSS
+ */
+
+/* ==================== INDICADOR DE ESTADO ==================== */
+
+.estado-conexion {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 0.9em;
+    margin-top: 10px;
+    transition: all 0.3s ease;
+}
+
+/* Estado online */
+.estado-conexion.online {
+    background: rgba(46, 204, 113, 0.2);
+    color: #2ecc71;
+    border: 1px solid rgba(46, 204, 113, 0.4);
+}
+
+/* Estado offline */
+.estado-conexion.offline {
+    background: rgba(231, 76, 60, 0.2);
+    color: #e74c3c;
+    border: 1px solid rgba(231, 76, 60, 0.4);
+    animation: pulso-alerta 1.5s infinite;
+}
+
+/* Estado obsoleto (datos > 30s) */
+.estado-conexion.obsoleto {
+    background: rgba(243, 156, 18, 0.2);
+    color: #f39c12;
+    border: 1px solid rgba(243, 156, 18, 0.4);
+}
+
+/* WT-22: Estado reintentando */
+.estado-conexion.reintentando {
+    background: rgba(241, 196, 15, 0.9);
+    color: #000;
+    border: 1px solid rgba(241, 196, 15, 1);
+    animation: pulso-alerta 1s infinite;
+}
+
+/* Icono de estado */
+.icono-estado {
+    font-size: 1em;
+    transition: transform 0.3s ease;
+}
+
+/* Icono pulsante cuando esta actualizando */
+.icono-estado.actualizando {
+    animation: spin 1s linear infinite;
+}
+
+/* Timestamp */
+.timestamp-estado {
+    font-size: 0.85em;
+    opacity: 0.8;
+    margin-left: 5px;
+}
+
+.timestamp-estado::before {
+    content: "•";
+    margin-right: 8px;
+}
+
+/* Cards atenuadas cuando datos obsoletos */
+.datos-obsoletos .dashboard-card {
+    opacity: 0.7;
+    filter: grayscale(30%);
+}
+
+/* ==================== BANNER DE DESCONEXION ==================== */
+
+.banner-conexion {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1050;
+    background: linear-gradient(135deg, #e74c3c, #c0392b);
+    color: white;
+    padding: 12px 0;
+    box-shadow: 0 4px 15px rgba(231, 76, 60, 0.4);
+    transform: translateY(0);
+    transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.banner-conexion.oculto {
+    transform: translateY(-100%);
+    opacity: 0;
+    pointer-events: none;
+}
+
+.banner-conexion .container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.banner-icono {
+    font-size: 1.3em;
+    animation: pulso-icono 1.5s infinite;
+}
+
+.banner-mensaje {
+    font-weight: 600;
+    font-size: 1em;
+}
+
+.banner-tiempo {
+    font-size: 0.9em;
+    opacity: 0.9;
+    background: rgba(0, 0, 0, 0.2);
+    padding: 4px 12px;
+    border-radius: 15px;
+}
+
+.banner-cerrar {
+    color: white;
+    opacity: 0.8;
+    font-size: 1.5em;
+    margin-left: 15px;
+    text-shadow: none;
+}
+
+.banner-cerrar:hover {
+    opacity: 1;
+    color: white;
+}
+
+/* Ajustar header cuando el banner esta visible */
+body.banner-visible .header-dashboard {
+    margin-top: 50px;
+}
+
+/* ==================== NOTIFICACION DE RECONEXION ==================== */
+
+.notificacion-reconexion {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1060;
+    background: linear-gradient(135deg, #2ecc71, #27ae60);
+    color: white;
+    padding: 15px 25px;
+    border-radius: 8px;
+    box-shadow: 0 6px 20px rgba(46, 204, 113, 0.4);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 600;
+    transform: translateX(0);
+    opacity: 1;
+    transition: transform 0.4s ease, opacity 0.4s ease;
+}
+
+.notificacion-reconexion.oculto {
+    transform: translateX(120%);
+    opacity: 0;
+    pointer-events: none;
+}
+
+.notificacion-reconexion .glyphicon {
+    font-size: 1.3em;
+}
+
+/* ==================== ANIMACIONES ==================== */
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+@keyframes pulso-alerta {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+}
+
+@keyframes pulso-icono {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.7; transform: scale(1.1); }
+}
+
+/* ==================== RESPONSIVE ==================== */
+
+@media (max-width: 767px) {
+    .banner-conexion {
+        padding: 10px 0;
+    }
+
+    .banner-mensaje {
+        font-size: 0.9em;
+    }
+
+    .banner-tiempo {
+        font-size: 0.8em;
+    }
+
+    .notificacion-reconexion {
+        top: auto;
+        bottom: 20px;
+        right: 10px;
+        left: 10px;
+        justify-content: center;
+    }
+
+    body.banner-visible .header-dashboard {
+        margin-top: 60px;
+    }
+}

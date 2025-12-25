@@ -8,7 +8,12 @@
 type="image/x-icon">
 <link rel="icon" href="{{ url_for('static', filename = 'proyecto.ico') }}"
 type="image/x-icon">
-<link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+<!-- WT-23: CSS modular -->
+<link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/bateria.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/conexion.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/ayuda.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/tendencia.css') }}">
 {% endblock %}
 
 {% block navbar %}

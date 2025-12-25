@@ -1,0 +1,88 @@
+/**
+ * Estilos de indicadores de tendencia
+ * WT-9: Indicadores visuales de tendencia
+ * WT-23: Refactorizacion modular CSS
+ */
+
+/* ==================== FLECHA DE TENDENCIA ==================== */
+
+.tendencia-flecha {
+    display: inline-block;
+    margin-left: 10px;
+    font-size: 0.7em;
+    vertical-align: middle;
+    transition: all 0.3s ease;
+}
+
+.tendencia-flecha.subiendo {
+    color: #e74c3c;
+}
+
+.tendencia-flecha.bajando {
+    color: #3498db;
+}
+
+.tendencia-flecha.estable {
+    color: #95a5a6;
+}
+
+/* Color segun acercamiento a deseada */
+.tendencia-flecha.acercando {
+    color: #2ecc71 !important;
+}
+
+.tendencia-flecha.alejando {
+    color: #e74c3c !important;
+}
+
+/* ==================== ICONO DEL CLIMATIZADOR ==================== */
+
+.tendencia-icono {
+    display: inline-block;
+    margin-left: 8px;
+    font-size: 0.6em;
+    vertical-align: middle;
+    transition: all 0.3s ease;
+}
+
+.tendencia-icono.enfriando {
+    color: #3498db;
+}
+
+.tendencia-icono.calentando {
+    color: #e74c3c;
+}
+
+.tendencia-icono.apagado {
+    color: #95a5a6;
+}
+
+.tendencia-icono.encendido {
+    color: #2ecc71;
+}
+
+/* ==================== TEXTO DESCRIPTIVO ==================== */
+
+.tendencia-texto {
+    font-size: 0.85em;
+    color: #7f8c8d;
+    margin-top: 8px;
+    min-height: 20px;
+    transition: all 0.3s ease;
+}
+
+.tendencia-texto.activo {
+    color: #2c3e50;
+}
+
+/* ==================== ANIMACION DE CAMBIO ==================== */
+
+@keyframes tendencia-pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+
+.tendencia-flecha.cambio {
+    animation: tendencia-pulse 0.3s ease;
+}

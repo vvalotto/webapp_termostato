@@ -1,0 +1,160 @@
+/**
+ * Estilos del panel de ayuda
+ * WT-8: Leyenda explicativa del funcionamiento
+ * WT-23: Refactorizacion modular CSS
+ */
+
+/* ==================== PANEL COLAPSABLE ==================== */
+
+.panel-ayuda {
+    background: rgba(255, 255, 255, 0.95);
+    border: none;
+    border-radius: 10px;
+    margin-top: 20px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.panel-ayuda .panel-heading {
+    background: transparent;
+    border: none;
+    padding: 15px 20px;
+}
+
+.panel-ayuda .panel-title {
+    margin: 0;
+}
+
+.ayuda-toggle {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #667eea;
+    font-weight: 600;
+    text-decoration: none;
+    font-size: 1.1em;
+}
+
+.ayuda-toggle:hover,
+.ayuda-toggle:focus {
+    color: #764ba2;
+    text-decoration: none;
+}
+
+.ayuda-toggle .toggle-icon {
+    margin-left: auto;
+    transition: transform 0.3s ease;
+}
+
+.ayuda-toggle[aria-expanded="true"] .toggle-icon {
+    transform: rotate(180deg);
+}
+
+.panel-ayuda .panel-body {
+    padding: 20px 25px 25px;
+    border-top: 1px solid rgba(102, 126, 234, 0.2);
+}
+
+/* ==================== TITULOS DE LEYENDA ==================== */
+
+.leyenda-titulo {
+    color: #2c3e50;
+    font-weight: 600;
+    margin-bottom: 15px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #667eea;
+}
+
+.leyenda-titulo .glyphicon {
+    margin-right: 8px;
+    color: #667eea;
+}
+
+/* ==================== LISTA DE LEYENDA ==================== */
+
+.leyenda-lista {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.leyenda-lista li {
+    display: flex;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    font-size: 0.95em;
+    color: #555;
+}
+
+.leyenda-lista li:last-child {
+    border-bottom: none;
+}
+
+.leyenda-lista strong {
+    color: #2c3e50;
+    margin-right: 8px;
+}
+
+/* ==================== ICONOS DE LEYENDA ==================== */
+
+.leyenda-icono {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    margin-right: 12px;
+    font-size: 14px;
+}
+
+/* Estados del climatizador */
+.estado-apagado {
+    background: linear-gradient(135deg, #95a5a6, #7f8c8d);
+    color: white;
+}
+
+.estado-encendido {
+    background: linear-gradient(135deg, #2ecc71, #27ae60);
+    color: white;
+}
+
+.estado-enfriando {
+    background: linear-gradient(135deg, #3498db, #2980b9);
+    color: white;
+}
+
+.estado-calentando {
+    background: linear-gradient(135deg, #e74c3c, #c0392b);
+    color: white;
+}
+
+/* Niveles de bateria */
+.bateria-normal {
+    background: linear-gradient(135deg, #2ecc71, #27ae60);
+    color: white;
+}
+
+.bateria-bajo {
+    background: linear-gradient(135deg, #f39c12, #e67e22);
+    color: white;
+}
+
+.bateria-critico {
+    background: linear-gradient(135deg, #e74c3c, #c0392b);
+    color: white;
+}
+
+/* ==================== RESPONSIVE ==================== */
+
+@media (max-width: 767px) {
+    .leyenda-lista li {
+        font-size: 0.9em;
+    }
+
+    .leyenda-icono {
+        width: 28px;
+        height: 28px;
+        font-size: 12px;
+    }
+}
