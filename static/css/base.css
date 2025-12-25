@@ -1,0 +1,306 @@
+/**
+ * Estilos base para la aplicacion Termostato
+ * Dashboard moderno con cards horizontales
+ * WT-23: Refactorizacion modular CSS
+ */
+
+/* ==================== RESET Y GENERALES ==================== */
+
+body {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* ==================== HEADER ==================== */
+
+.header-dashboard {
+    padding: 40px 0 30px;
+    color: white;
+    text-align: center;
+}
+
+.header-dashboard h1 {
+    font-size: 2.5em;
+    font-weight: 300;
+    margin-bottom: 10px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+}
+
+.header-dashboard .lead {
+    font-size: 1.2em;
+    opacity: 0.9;
+}
+
+/* ==================== CONTAINER ==================== */
+
+.dashboard-container {
+    padding: 30px 15px 60px;
+}
+
+/* ==================== CARDS ==================== */
+
+.dashboard-card {
+    background: white;
+    border-radius: 15px;
+    padding: 30px;
+    margin-bottom: 30px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.dashboard-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+}
+
+/* Iconos de las cards */
+.card-icon {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    opacity: 0.1;
+    font-size: 80px;
+}
+
+.card-title {
+    font-size: 1.5em;
+    font-weight: 600;
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 3px solid;
+}
+
+/* Colores especificos para cada card */
+.card-ambiente .card-title {
+    color: #3498db;
+    border-color: #3498db;
+}
+
+.card-ambiente .card-icon {
+    color: #3498db;
+}
+
+.card-climatizador .card-title {
+    color: #2ecc71;
+    border-color: #2ecc71;
+}
+
+.card-climatizador .card-icon {
+    color: #2ecc71;
+}
+
+.card-bateria .card-title {
+    color: #f39c12;
+    border-color: #f39c12;
+}
+
+.card-bateria .card-icon {
+    color: #f39c12;
+}
+
+/* ==================== METRICAS ==================== */
+
+.metric-group {
+    margin-bottom: 20px;
+}
+
+.metric-group:last-child {
+    margin-bottom: 0;
+}
+
+.metric-group label {
+    display: block;
+    font-size: 0.85em;
+    color: #7f8c8d;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+    font-weight: 600;
+}
+
+.metric-value {
+    font-size: 2.5em;
+    font-weight: 700;
+    color: #2c3e50;
+    line-height: 1.2;
+}
+
+.metric-unit {
+    font-size: 0.5em;
+    color: #95a5a6;
+    margin-left: 5px;
+}
+
+/* ==================== BADGES ==================== */
+
+.estado-badge,
+.nivel-badge {
+    display: inline-block;
+    padding: 12px 25px;
+    border-radius: 25px;
+    font-size: 0.6em;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-align: center;
+    min-width: 150px;
+}
+
+.badge-encendido {
+    background: linear-gradient(135deg, #2ecc71, #27ae60);
+    color: white;
+    box-shadow: 0 4px 15px rgba(46, 204, 113, 0.4);
+}
+
+.badge-apagado {
+    background: linear-gradient(135deg, #95a5a6, #7f8c8d);
+    color: white;
+    box-shadow: 0 4px 15px rgba(149, 165, 166, 0.4);
+}
+
+.badge-enfriando {
+    background: linear-gradient(135deg, #3498db, #2980b9);
+    color: white;
+    box-shadow: 0 4px 15px rgba(52, 152, 219, 0.4);
+}
+
+.badge-calentando {
+    background: linear-gradient(135deg, #e74c3c, #c0392b);
+    color: white;
+    box-shadow: 0 4px 15px rgba(231, 76, 60, 0.4);
+}
+
+/* WT-21: Estilos para valores invalidos */
+.valor-invalido {
+    color: #e74c3c !important;
+    font-style: italic;
+}
+
+.badge-invalido {
+    background: linear-gradient(135deg, #95a5a6, #7f8c8d);
+    color: white;
+    box-shadow: 0 4px 15px rgba(149, 165, 166, 0.4);
+    font-style: italic;
+}
+
+/* Efecto visual cuando un valor cambia */
+.valor-actualizado {
+    animation: highlight 0.3s ease;
+}
+
+@keyframes highlight {
+    0% { background-color: rgba(40, 167, 69, 0.3); }
+    100% { background-color: transparent; }
+}
+
+/* ==================== GRAFICAS ==================== */
+
+.card-grafica {
+    margin-top: 20px;
+}
+
+.card-grafica .card-title {
+    color: #9b59b6;
+    border-color: #9b59b6;
+}
+
+.card-grafica .card-body {
+    padding: 20px 0;
+}
+
+#temperaturaChart {
+    max-height: 400px;
+}
+
+.card-grafica-climatizador {
+    margin-top: 20px;
+}
+
+.card-grafica-climatizador .card-title {
+    color: #2ecc71;
+    border-color: #2ecc71;
+}
+
+.card-grafica-climatizador .card-body {
+    padding: 20px 0;
+}
+
+#climatizadorChart {
+    max-height: 400px;
+}
+
+/* ==================== NAVBAR ==================== */
+
+.navbar-default {
+    background: rgba(255, 255, 255, 0.95);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    border: none;
+}
+
+.navbar-default .navbar-brand {
+    font-weight: 700;
+    color: #667eea !important;
+}
+
+/* ==================== PAGINAS DE ERROR ==================== */
+
+.page-header h1 {
+    color: #d9534f;
+}
+
+/* ==================== TOOLTIPS ==================== */
+
+.tooltip-icon {
+    font-size: 0.6em;
+    opacity: 0.5;
+    margin-left: 5px;
+    vertical-align: middle;
+}
+
+.card-title:hover .tooltip-icon {
+    opacity: 0.8;
+}
+
+/* ==================== UTILIDADES ==================== */
+
+.oculto {
+    display: none !important;
+}
+
+/* ==================== RESPONSIVE - TABLETS ==================== */
+
+@media (max-width: 991px) {
+    .dashboard-card {
+        margin-bottom: 20px;
+    }
+
+    .metric-value {
+        font-size: 2em;
+    }
+}
+
+/* ==================== RESPONSIVE - MOVILES ==================== */
+
+@media (max-width: 767px) {
+    .header-dashboard h1 {
+        font-size: 1.8em;
+    }
+
+    .dashboard-container {
+        padding: 20px 15px 40px;
+    }
+
+    .dashboard-card {
+        padding: 25px;
+    }
+
+    .card-icon {
+        font-size: 60px;
+    }
+
+    .metric-value {
+        font-size: 2.2em;
+    }
+}
