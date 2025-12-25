@@ -19,6 +19,15 @@ let estadoAnterior = 'online';
 let bannerCerradoManualmente = false;
 
 /**
+ * WT-22: Configuracion de reintentos
+ */
+const CONFIG_REINTENTOS = {
+    maxReintentos: 3,
+    timeouts: [2000, 4000, 8000] // Timeout progresivo en ms
+};
+let intentoActual = 0;
+
+/**
  * WT-21: Reglas de validacion para cada campo de la API
  */
 const REGLAS_VALIDACION = {
@@ -83,11 +92,75 @@ function validarDatos(datos) {
 }
 
 /**
- * Obtiene el estado del termostato desde el endpoint /api/estado
+ * WT-22: Muestra/oculta el indicador de reintentando
+ */
+function mostrarReintentando(visible, intento) {
+    const contenedor = document.getElementById('estado-conexion');
+    const icono = document.getElementById('icono-estado');
+    const texto = document.getElementById('texto-estado');
+
+    if (!contenedor || !icono || !texto) return;
+
+    if (visible) {
+        // Cambiar a estado "reintentando"
+        contenedor.classList.remove('online', 'offline', 'obsoleto');
+        contenedor.classList.add('reintentando');
+        icono.classList.remove('glyphicon-ok', 'glyphicon-remove', 'glyphicon-warning-sign');
+        icono.classList.add('glyphicon-refresh', 'actualizando');
+        texto.textContent = 'Reintentando... (' + intento + '/' + CONFIG_REINTENTOS.maxReintentos + ')';
+    }
+}
+
+/**
+ * WT-22: Fetch con timeout
+ */
+function fetchConTimeout(url, timeout) {
+    return Promise.race([
+        fetch(url),
+        new Promise(function(_, reject) {
+            setTimeout(function() {
+                reject(new Error('Timeout'));
+            }, timeout);
+        })
+    ]);
+}
+
+/**
+ * WT-22: Obtiene el estado con reintentos automaticos
  */
 async function obtenerEstado() {
-    const response = await fetch('/api/estado');
-    return response.json();
+    intentoActual = 0;
+
+    while (intentoActual < CONFIG_REINTENTOS.maxReintentos) {
+        const timeout = CONFIG_REINTENTOS.timeouts[intentoActual];
+        try {
+            const response = await fetchConTimeout('/api/estado', timeout);
+            const data = await response.json();
+
+            // Verificar si la respuesta indica exito
+            if (data.success) {
+                intentoActual = 0;
+                return data;
+            }
+
+            // API respondio pero con error, reintentar
+            throw new Error('API retorno success=false');
+        } catch (error) {
+            intentoActual++;
+            console.warn('WT-22: Intento ' + intentoActual + ' fallido:', error.message);
+
+            if (intentoActual < CONFIG_REINTENTOS.maxReintentos) {
+                mostrarReintentando(true, intentoActual);
+                // Esperar antes del siguiente reintento (backoff)
+                await new Promise(function(resolve) {
+                    setTimeout(resolve, 500 * intentoActual);
+                });
+            }
+        }
+    }
+
+    // Todos los reintentos fallaron
+    throw new Error('Todos los reintentos fallaron');
 }
 
 /**

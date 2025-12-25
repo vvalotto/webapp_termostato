@@ -392,6 +392,14 @@ body {
     border: 1px solid rgba(243, 156, 18, 0.4);
 }
 
+/* WT-22: Estado reintentando */
+.estado-conexion.reintentando {
+    background: rgba(241, 196, 15, 0.9);
+    color: #000;
+    border: 1px solid rgba(241, 196, 15, 1);
+    animation: pulso-alerta 1s infinite;
+}
+
 /* Icono de estado */
 .icono-estado {
     font-size: 1em;
