@@ -1,40 +1,67 @@
 # Webapp Termostato
 
-Aplicación web Flask para visualización del estado de un termostato. Actúa como frontend consumiendo la API REST del backend `app_termostato`.
+**Version 2.0.0**
 
-## Descripción
+Aplicacion web Flask para visualizacion del estado de un termostato IoT. Actua como frontend consumiendo la API REST del backend `app_termostato`.
 
-Este proyecto es parte de un caso de estudio académico/didáctico que demuestra la arquitectura cliente-servidor con separación de frontend y backend.
+## Descripcion
 
-La aplicación muestra en un **dashboard moderno tipo IoT**:
-- Temperatura ambiente actual
+Este proyecto es parte de un caso de estudio academico/didactico que demuestra la arquitectura cliente-servidor con separacion de frontend y backend.
+
+La aplicacion muestra en un **dashboard moderno tipo IoT**:
+- Temperatura ambiente actual con indicador de tendencia
 - Temperatura deseada configurada
-- Estado del climatizador (encendido/apagado)
-- Voltaje de la batería (en voltios)
-- Nivel de carga de batería (normal/bajo)
-- **Gráfica de evolución de temperatura** (últimos 5 minutos)
-- **Gráfica de historial del climatizador** (últimos 5 minutos)
+- Diferencia entre temperatura actual y objetivo
+- Estado del climatizador (apagado/encendido/enfriando/calentando)
+- Voltaje de la bateria con alertas visuales
+- Nivel de carga de bateria (NORMAL/BAJO/CRITICO)
+- Grafica de evolucion de temperatura con zona de confort
+- Grafica de historial del climatizador
+- Estado de conexion en tiempo real
 
 ## Arquitectura
 
 ```
-┌─────────────────────┐         ┌─────────────────────┐
-│  webapp_termostato  │  HTTP   │   app_termostato    │
-│     (Frontend)      │ ──────► │     (Backend)       │
-│     Puerto 5001     │  REST   │     Puerto 5050     │
-└─────────────────────┘         └─────────────────────┘
++---------------------+         +---------------------+
+|  webapp_termostato  |  HTTP   |   app_termostato    |
+|     (Frontend)      | ------> |     (Backend)       |
+|     Puerto 5001     |  REST   |     Puerto 5050     |
++---------------------+         +---------------------+
+```
+
+## Estructura del Proyecto
+
+```
+webapp_termostato/
+├── app.py                  # Punto de entrada
+├── webapp/                 # Aplicacion Flask
+│   ├── __init__.py         # App Flask + rutas
+│   ├── forms.py            # Formularios WTForms
+│   ├── templates/          # Templates Jinja2
+│   │   ├── base.html
+│   │   ├── index.html
+│   │   ├── 404.html
+│   │   └── 500.html
+│   └── static/             # Archivos estaticos
+│       ├── css/            # Estilos modulares
+│       ├── js/             # JavaScript modular
+│       └── proyecto.ico
+├── tests/                  # Tests unitarios
+│   └── test_app.py
+├── docs/                   # Documentacion
+├── quality/                # Scripts de calidad
+├── requirements.txt        # Dependencias produccion
+├── requirements-dev.txt    # Dependencias desarrollo
+└── pytest.ini              # Configuracion pytest
 ```
 
 ## Requisitos
 
-- Python 3.8+
-- Flask
-- Flask-Bootstrap
-- Flask-Moment
-- Flask-WTF
-- Requests
+- Python 3.12+
+- Flask 3.x
+- Node.js (opcional, para linting web)
 
-## Instalación
+## Instalacion
 
 1. Clonar el repositorio:
 ```bash
@@ -53,240 +80,137 @@ source .venv/bin/activate  # En Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-O manualmente:
+4. Para desarrollo (incluye testing):
 ```bash
-pip install flask flask-bootstrap flask-moment flask-wtf requests
+pip install -r requirements-dev.txt
 ```
 
-## Configuración
+## Configuracion
 
-La aplicación usa variables de entorno para configuración:
-
-| Variable | Descripción | Valor por defecto |
+| Variable | Descripcion | Valor por defecto |
 |----------|-------------|-------------------|
 | `SECRET_KEY` | Clave secreta para sesiones Flask | `clave-desarrollo-local` |
-| `API_URL` | URL del backend API (Render) | `http://localhost:5050` |
-| `URL_APP_API` | URL del backend API (alternativo) | `http://localhost:5050` |
+| `API_URL` | URL del backend API | `http://localhost:5050` |
 
-**Nota**: La aplicación prioriza `API_URL` sobre `URL_APP_API` para compatibilidad con Render.
-
-Ejemplo de configuración:
 ```bash
 export SECRET_KEY="mi-clave-secreta"
 export API_URL="http://localhost:5050"
 ```
 
-## Ejecución
+## Ejecucion
 
-1. Asegurarse de que el backend (`app_termostato`) esté ejecutándose en el puerto 5050.
+1. Asegurarse de que el backend (`app_termostato`) este ejecutandose.
 
-2. Ejecutar la aplicación:
+2. Ejecutar la aplicacion:
 ```bash
-python lanzador.py
+python app.py
 ```
 
 3. Acceder en el navegador: http://localhost:5001
 
-## Estructura del Proyecto
+### Produccion
 
-```
-webapp_termostato/
-├── lanzador.py          # Punto de entrada de la aplicación
-├── forms.py             # Definición de formularios WTForms
-├── templates/
-│   ├── base.html        # Template base con navbar, CSS y Chart.js
-│   ├── index.html       # Dashboard principal con cards y gráficas
-│   ├── 404.html         # Página de error 404
-│   └── 500.html         # Página de error 500
-├── static/
-│   ├── js/
-│   │   └── graficas.js  # Módulo JavaScript para gráficas (Chart.js)
-│   ├── styles.css       # Estilos CSS personalizados (dashboard moderno)
-│   └── proyecto.ico     # Favicon de la aplicación
-├── requirements.txt     # Dependencias Python
-├── DEPLOY_RENDER.md     # Guía de despliegue en Render
-└── README.md            # Este archivo
+```bash
+gunicorn app:app
 ```
 
-## Endpoints Consumidos
+## Tests
 
-La aplicación consume los siguientes endpoints del backend:
+```bash
+# Ejecutar todos los tests
+pytest
 
-| Método | Endpoint | Descripción |
+# Con cobertura detallada
+pytest --cov=webapp --cov-report=html
+```
+
+**Cobertura actual: 100%**
+
+## API Endpoints
+
+### Frontend (webapp_termostato)
+
+| Metodo | Endpoint | Descripcion |
 |--------|----------|-------------|
-| GET | `/termostato/temperatura_ambiente/` | Obtiene temperatura ambiente |
-| GET | `/termostato/temperatura_deseada/` | Obtiene temperatura deseada |
-| GET | `/termostato/bateria/` | Obtiene voltaje de la batería |
-| GET | `/termostato/nivel_de_carga/` | Obtiene nivel de carga (normal/bajo) |
-| GET | `/termostato/estado_climatizador/` | Obtiene estado del climatizador |
+| GET | `/` | Dashboard principal |
+| GET | `/api/estado` | Estado del termostato (JSON) |
+| GET | `/api/historial` | Historial de temperaturas |
+| GET | `/health` | Health check del servicio |
 
-## Características
+### Health Check
 
-### Interfaz de Usuario
-- **Dashboard moderno**: Diseño tipo IoT con cards horizontales y colores distintivos
-- **Cards interactivas**: Tres zonas visuales (Ambiente, Climatizador, Batería)
-- **Iconos Glyphicon**: Iconos semitransparentes de fondo en cada card
-- **Efectos visuales**: Sombras, bordes redondeados, y efecto hover
-- **Badges dinámicos**:
-  - Estado del climatizador: Verde (encendido) / Gris (apagado)
-  - Nivel de batería: Azul (normal) / Rojo pulsante (bajo)
-- **Diseño responsive**: Se adapta a desktop (3 columnas), tablet y móvil (apiladas)
-- **Fondo degradado**: Gradiente violeta/púrpura moderno
+```json
+GET /health
 
-### Funcionalidad
-- **Auto-refresh**: La página se actualiza automáticamente cada 10 segundos
-- **Manejo de errores**: Muestra "Error API" si el backend no responde
-- **Métricas grandes**: Números destacados para fácil lectura
-- **Unidades claras**: °C para temperaturas, V para voltaje de batería
-- **Gráficas en tiempo real**: Visualización histórica de los últimos 5 minutos
-- **Persistencia local**: Datos almacenados en localStorage del navegador
-- **Limpieza automática**: Solo se guardan datos de los últimos 5 minutos
+// Respuesta OK (200)
+{
+  "status": "ok",
+  "timestamp": "2025-12-26T19:48:29",
+  "frontend": {"version": "2.0.0", "status": "ok"},
+  "backend": {"status": "ok", "version": "1.1.0", "uptime_seconds": 3600}
+}
 
-### Gráficas Interactivas
-- **Gráfica de Temperatura**:
-  - Línea suave con relleno (color turquesa)
-  - Muestra evolución de temperatura ambiente
-  - Se actualiza cada 10 segundos
-  - Ventana temporal: últimos 5 minutos
-- **Gráfica de Climatizador**:
-  - Línea escalonada (ideal para estados binarios)
-  - Código de colores: Verde (encendido) / Gris (apagado)
-  - Puntos coloreados según el estado
-  - Ventana temporal: últimos 5 minutos
+// Respuesta degradada (503)
+{
+  "status": "degraded",
+  "frontend": {"version": "2.0.0", "status": "ok"},
+  "backend": {"status": "unavailable", "error": "..."}
+}
+```
 
-### Tecnologías UI
-- Bootstrap 3 (grid system y componentes)
-- CSS3 (animaciones, gradientes, transformaciones)
-- Jinja2 (templates con lógica condicional para badges)
-- Chart.js 4.4 (gráficas interactivas)
-- JavaScript modular (código organizado en módulos)
-- LocalStorage API (persistencia de datos en el navegador)
+### Backend consumido
 
-## Vista del Dashboard
+| Metodo | Endpoint | Descripcion |
+|--------|----------|-------------|
+| GET | `/termostato/` | Estado completo del termostato |
+| GET | `/termostato/historial/` | Historial de temperaturas |
+| GET | `/comprueba/` | Health check del backend |
 
-El dashboard presenta tres cards principales dispuestas horizontalmente:
+## Caracteristicas
 
-### 🌡️ Card Ambiente (Azul)
-- Icono de fuego de fondo
-- Temperatura Actual en °C
-- Temperatura Deseada en °C
-- Números grandes para fácil lectura
+### Dashboard v2.0
 
-### ⚡ Card Climatizador (Verde)
-- Icono de refresh de fondo
-- Estado del sistema con badge dinámico
-- Verde brillante cuando está encendido
-- Gris cuando está apagado
+- **Estado de conexion visible**: Indicador online/offline con timestamp
+- **Indicadores de tendencia**: Flechas de temperatura subiendo/bajando
+- **Diferencia de temperatura**: Barra visual hacia el objetivo
+- **Alertas de bateria**: Colores y animaciones segun nivel
+- **Alerta de desconexion**: Banner cuando se pierde conexion
+- **Zona de confort en grafica**: Banda sombreada alrededor de temperatura deseada
+- **Ventana de tiempo configurable**: 5min, 1h, 6h, 24h con historial del servidor
+- **Panel de ayuda**: Explicacion de estados del climatizador y bateria
+- **Dashboard responsive**: Optimizado para moviles (min 44px tactil)
 
-### 🔋 Card Batería (Naranja)
-- Icono de rayo de fondo
-- Voltaje de la batería (en voltios)
-- Badge de nivel de carga:
-  - Azul para nivel "NORMAL"
-  - Rojo pulsante para nivel "BAJO" (con animación de alerta)
+### Tecnologias
 
-### 📊 Gráficas de Evolución
-Debajo de las cards principales se muestran dos gráficas:
-- **Gráfica de Temperatura**: Evolución temporal con línea suave
-- **Gráfica de Climatizador**: Historial de estados (encendido/apagado) con línea escalonada
+- Flask 3.x con Blueprints
+- Bootstrap 3 + CSS modular
+- Chart.js 4.4 para graficas
+- JavaScript modular (ES6)
+- Pytest para testing
+- Pylint + ESLint + Stylelint para calidad
 
-**Diseño responsive**: En móviles las cards se apilan verticalmente para mejor visualización.
+## Calidad de Codigo
+
+El proyecto incluye herramientas de analisis de calidad:
+
+```bash
+# Analisis Python
+python quality/scripts/calculate_metrics.py webapp/
+
+# Analisis Web (requiere npm install)
+python quality/scripts/calculate_web_metrics.py .
+```
+
+**Metricas actuales:**
+- Pylint: 9.88/10
+- Cobertura: 100%
+- Complejidad ciclomatica: 2.0 promedio
 
 ## Proyecto Relacionado
 
 Este frontend requiere el backend API:
-- **app_termostato**: API REST que gestiona los datos del termostato
-
-## Notas Técnicas
-
-### Formato de Respuestas de la API
-
-La aplicación espera que el backend devuelva respuestas JSON con el siguiente formato:
-
-```json
-// /termostato/temperatura_ambiente/
-{"temperatura_ambiente": "22"}
-
-// /termostato/temperatura_deseada/
-{"temperatura_deseada": "25"}
-
-// /termostato/bateria/
-{"carga_bateria": "12.6"}  // Voltaje en voltios
-
-// /termostato/nivel_de_carga/
-{"nivel_de_carga": "normal"}  // o "bajo"
-
-// /termostato/estado_climatizador/
-{"estado_climatizador": "encendido"}  // o "apagado"
-```
-
-### Troubleshooting
-
-**Los estilos no se cargan correctamente**:
-- Asegúrate de hacer un refresh forzado del navegador (Ctrl+Shift+R o Cmd+Shift+R)
-- Verifica que el archivo `static/styles.css` exista
-- Verifica que `base.html` incluya el link al CSS
-
-**Error "Error API" en los campos**:
-- Verifica que el backend esté ejecutándose en el puerto configurado
-- Revisa que la variable `API_URL` o `URL_APP_API` apunte a la URL correcta
-- Verifica la conectividad de red entre frontend y backend
-
-**El dashboard no se actualiza**:
-- La página tiene auto-refresh cada 10 segundos
-- Si el backend no responde, mostrará "Error API"
-
-**Las gráficas no se muestran o están vacías**:
-- Las gráficas necesitan al menos un dato para mostrarse
-- Espera 10 segundos (un ciclo de auto-refresh) para que se capture el primer dato
-- Abre la consola del navegador (F12) y busca errores de JavaScript
-- Verifica que Chart.js se haya cargado correctamente desde el CDN
-
-**Limpiar el histórico de las gráficas**:
-Para borrar todos los datos almacenados en localStorage, abre la consola del navegador y ejecuta:
-```javascript
-localStorage.removeItem('temperatura_historico');
-localStorage.removeItem('climatizador_historico');
-```
-
-**Cambiar la ventana de tiempo de las gráficas**:
-Por defecto, las gráficas muestran los últimos 5 minutos. Para cambiar este valor:
-1. Edita el archivo `static/js/graficas.js`
-2. Modifica la constante `VENTANA_TIEMPO_MS` en la línea 9:
-```javascript
-const VENTANA_TIEMPO_MS = 10 * 60 * 1000; // 10 minutos
-```
-
-## Arquitectura del Código JavaScript
-
-El módulo `static/js/graficas.js` está organizado de manera modular:
-
-### Configuración Global
-- `VENTANA_TIEMPO_MS`: Ventana temporal de 5 minutos
-- `filtrarPorTiempo()`: Función utilitaria para filtrar datos antiguos
-
-### Módulo de Temperatura
-- `obtenerTemperaturaActual()`: Extrae temperatura del DOM
-- `cargarHistoricoTemperatura()`: Lee y filtra datos de localStorage
-- `guardarHistoricoTemperatura()`: Guarda solo datos recientes
-- `agregarTemperatura()`: Agrega punto y limpia histórico
-- `actualizarGraficaTemperatura()`: Renderiza gráfica con Chart.js
-
-### Módulo de Climatizador
-- `obtenerEstadoClimatizador()`: Extrae estado del DOM
-- `cargarHistoricoClimatizador()`: Lee y filtra datos de localStorage
-- `guardarHistoricoClimatizador()`: Guarda solo datos recientes
-- `agregarEstadoClimatizador()`: Agrega punto y limpia histórico
-- `actualizarGraficaClimatizador()`: Renderiza gráfica con Chart.js
-
-### Inicialización
-- `inicializarGraficas()`: Punto de entrada ejecutado al cargar el DOM
-
-Este diseño sigue los principios de:
-- **Alta cohesión**: Cada función tiene una responsabilidad única
-- **Bajo acoplamiento**: Módulos independientes
-- **Separación de responsabilidades**: HTML (estructura), CSS (presentación), JS (comportamiento)
+- **app_termostato**: API REST que gestiona los datos del termostato (v1.1.0)
 
 ## Licencia
 
-Proyecto académico/didáctico para el curso ISSE.
+Proyecto academico/didactico para el curso ISSE.
