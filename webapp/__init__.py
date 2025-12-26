@@ -12,6 +12,9 @@ import requests
 
 from .forms import TermostatoForm
 
+# Version del frontend
+VERSION = '2.0.0'
+
 # Configuracion de la aplicacion
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'clave-desarrollo-local')
@@ -135,3 +138,61 @@ def api_estado():
         'error': 'No se pudo conectar con la API del termostato',
         'timestamp': timestamp
     }), 503
+
+
+@app.route("/health")
+def health():
+    """
+    Health check endpoint para monitoreo del servicio (WT-27).
+
+    Verifica la conexion con el backend y retorna el estado del sistema.
+    Timeout de 2 segundos para cumplir con el requisito de respuesta rapida.
+
+    Returns:
+        200: Sistema saludable, backend responde
+        503: Backend no disponible
+    """
+    timestamp = datetime.utcnow().isoformat()
+    backend_status = None
+    backend_version = None
+    backend_uptime = None
+
+    try:
+        url = f"{URL_APP_API}/comprueba/"
+        respuesta = requests.get(url, timeout=2)
+        respuesta.raise_for_status()
+        datos_backend = respuesta.json()
+
+        backend_status = datos_backend.get('status', 'unknown')
+        backend_version = datos_backend.get('version', 'unknown')
+        backend_uptime = datos_backend.get('uptime_seconds')
+
+        return jsonify({
+            'status': 'ok',
+            'timestamp': timestamp,
+            'frontend': {
+                'version': VERSION,
+                'status': 'ok'
+            },
+            'backend': {
+                'status': backend_status,
+                'version': backend_version,
+                'uptime_seconds': backend_uptime,
+                'url': URL_APP_API
+            }
+        }), 200
+
+    except requests.exceptions.RequestException as e:
+        return jsonify({
+            'status': 'degraded',
+            'timestamp': timestamp,
+            'frontend': {
+                'version': VERSION,
+                'status': 'ok'
+            },
+            'backend': {
+                'status': 'unavailable',
+                'error': str(e),
+                'url': URL_APP_API
+            }
+        }), 503

@@ -29,6 +29,13 @@ DATOS_HISTORIAL_VALIDOS = {
     'total': 2
 }
 
+DATOS_HEALTH_BACKEND = {
+    'status': 'ok',
+    'timestamp': '2025-12-26T10:30:00',
+    'uptime_seconds': 3600,
+    'version': '1.1.0'
+}
+
 
 @pytest.fixture
 def client():
@@ -219,3 +226,53 @@ class TestApiHistorial:
         data = response.get_json()
         assert data['success'] is False
         assert data['historial'] == []
+
+
+class TestHealth:
+    """Tests para el endpoint /health (WT-27)"""
+
+    @patch('webapp.requests.get')
+    def test_health_con_backend_ok(self, mock_get, client):
+        """Test de /health con backend funcionando."""
+        mock_response = Mock()
+        mock_response.json.return_value = DATOS_HEALTH_BACKEND
+        mock_response.raise_for_status.return_value = None
+        mock_get.return_value = mock_response
+
+        response = client.get('/health')
+
+        assert response.status_code == 200
+        data = response.get_json()
+        assert data['status'] == 'ok'
+        assert 'timestamp' in data
+        assert data['frontend']['status'] == 'ok'
+        assert data['frontend']['version'] == '2.0.0'
+        assert data['backend']['status'] == 'ok'
+        assert data['backend']['version'] == '1.1.0'
+        assert data['backend']['uptime_seconds'] == 3600
+
+    @patch('webapp.requests.get')
+    def test_health_con_backend_caido(self, mock_get, client):
+        """Test de /health con backend no disponible."""
+        mock_get.side_effect = requests.exceptions.ConnectionError('No connection')
+
+        response = client.get('/health')
+
+        assert response.status_code == 503
+        data = response.get_json()
+        assert data['status'] == 'degraded'
+        assert data['frontend']['status'] == 'ok'
+        assert data['backend']['status'] == 'unavailable'
+        assert 'error' in data['backend']
+
+    @patch('webapp.requests.get')
+    def test_health_con_backend_timeout(self, mock_get, client):
+        """Test de /health con backend timeout."""
+        mock_get.side_effect = requests.exceptions.Timeout('Timeout')
+
+        response = client.get('/health')
+
+        assert response.status_code == 503
+        data = response.get_json()
+        assert data['status'] == 'degraded'
+        assert data['backend']['status'] == 'unavailable'
