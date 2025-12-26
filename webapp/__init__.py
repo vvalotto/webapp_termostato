@@ -1,9 +1,8 @@
 """
-Aplicación web Flask para visualización de datos del termostato.
+Aplicacion web Flask para visualizacion de datos del termostato.
 Consume la API REST del backend (app_termostato) y muestra los datos en una interfaz web.
 """
 import os
-
 from datetime import datetime
 
 from flask import Flask, render_template, jsonify, request
@@ -11,9 +10,9 @@ from flask_bootstrap import Bootstrap
 from flask_moment import Moment
 import requests
 
-from forms import TermostatoForm
+from .forms import TermostatoForm
 
-# Configuración de la aplicación
+# Configuracion de la aplicacion
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'clave-desarrollo-local')
 
@@ -21,10 +20,10 @@ app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'clave-desarrollo-local'
 bootstrap = Bootstrap(app)
 moment = Moment(app)
 
-# Configuración de la API (API_URL para Render, URL_APP_API como fallback)
+# Configuracion de la API (API_URL para Render, URL_APP_API como fallback)
 URL_APP_API = os.environ.get('API_URL', os.environ.get('URL_APP_API', 'http://localhost:5050'))
 
-# Cache para última respuesta válida
+# Cache para ultima respuesta valida
 ultima_respuesta_valida = None
 ultimo_timestamp = None
 
@@ -44,7 +43,7 @@ def obtener_estado_termostato():
         respuesta = requests.get(url, timeout=5)
         respuesta.raise_for_status()
         datos = respuesta.json()
-        # Cachear respuesta válida
+        # Cachear respuesta valida
         ultima_respuesta_valida = datos
         ultimo_timestamp = datetime.utcnow().isoformat()
         return datos, ultimo_timestamp, False
@@ -57,7 +56,7 @@ def obtener_estado_termostato():
 
 @app.route("/")
 def index():
-    """Página principal que muestra el estado del termostato."""
+    """Pagina principal que muestra el estado del termostato."""
     formulario = TermostatoForm()
 
     # Obtener todos los datos en una sola llamada
@@ -87,10 +86,10 @@ def api_historial():
     Endpoint para obtener el historial de temperaturas desde la API backend (WT-15).
 
     Query params:
-        limite: Número máximo de registros a obtener (default: 60)
+        limite: Numero maximo de registros a obtener (default: 60)
 
     Returns:
-        JSON con el historial de temperaturas o error 503 si no hay conexión.
+        JSON con el historial de temperaturas o error 503 si no hay conexion.
     """
     limite = request.args.get('limite', 60, type=int)
     try:
@@ -115,10 +114,10 @@ def api_historial():
 def api_estado():
     """
     Endpoint JSON para obtener el estado del termostato.
-    Útil para actualización AJAX sin recargar la página (WT-12).
+    Util para actualizacion AJAX sin recargar la pagina (WT-12).
 
     Returns:
-        JSON con los datos del termostato o error 503 si no hay conexión.
+        JSON con los datos del termostato o error 503 si no hay conexion.
         Incluye from_cache=True si los datos son cacheados (backend no responde).
     """
     datos, timestamp, from_cache = obtener_estado_termostato()
@@ -136,7 +135,3 @@ def api_estado():
         'error': 'No se pudo conectar con la API del termostato',
         'timestamp': timestamp
     }), 503
-
-
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5001, debug=True)
