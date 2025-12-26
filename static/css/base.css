@@ -282,25 +282,120 @@ body {
 }
 
 /* ==================== RESPONSIVE - MOVILES ==================== */
+/* WT-24: Dashboard responsive mejorado */
 
 @media (max-width: 767px) {
+    /* Fuentes legibles sin zoom (minimo 16px base) */
+    body {
+        font-size: 16px;
+    }
+
+    .header-dashboard {
+        padding: 25px 0 20px;
+    }
+
     .header-dashboard h1 {
-        font-size: 1.8em;
+        font-size: 1.6em;
+    }
+
+    .header-dashboard .lead {
+        font-size: 1em;
     }
 
     .dashboard-container {
-        padding: 20px 15px 40px;
+        padding: 15px 10px 30px;
     }
 
+    /* Cards con espaciado optimizado para movil */
     .dashboard-card {
-        padding: 25px;
+        padding: 20px 15px;
+        margin-bottom: 15px;
+        border-radius: 12px;
     }
 
     .card-icon {
-        font-size: 60px;
+        font-size: 50px;
+        top: 15px;
+        right: 15px;
+    }
+
+    .card-title {
+        font-size: 1.2em;
+        margin-bottom: 15px;
+        padding-bottom: 10px;
+    }
+
+    .metric-group label {
+        font-size: 0.8em;
+        margin-bottom: 5px;
     }
 
     .metric-value {
-        font-size: 2.2em;
+        font-size: 1.8em;
+    }
+
+    .metric-unit {
+        font-size: 0.6em;
+    }
+
+    /* Badges con tamano tactil adecuado */
+    .estado-badge,
+    .nivel-badge {
+        padding: 10px 20px;
+        font-size: 0.55em;
+        min-width: 120px;
+        min-height: 44px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* Graficas con scroll horizontal */
+    .card-grafica .card-body,
+    .card-grafica-climatizador .card-body {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    #temperaturaChart,
+    #climatizadorChart {
+        min-width: 500px;
+        max-height: 300px;
+    }
+}
+
+/* ==================== RESPONSIVE - MOVILES PEQUENOS ==================== */
+/* WT-24: Ajustes para pantallas muy pequenas (<480px) */
+
+@media (max-width: 480px) {
+    .header-dashboard h1 {
+        font-size: 1.4em;
+    }
+
+    .dashboard-container {
+        padding: 10px 8px 25px;
+    }
+
+    .dashboard-card {
+        padding: 15px 12px;
+    }
+
+    .card-icon {
+        font-size: 40px;
+    }
+
+    .metric-value {
+        font-size: 1.5em;
+    }
+
+    .estado-badge,
+    .nivel-badge {
+        min-width: 100px;
+        padding: 8px 15px;
+    }
+
+    #temperaturaChart,
+    #climatizadorChart {
+        min-width: 450px;
     }
 }
