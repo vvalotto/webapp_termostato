@@ -1,0 +1,70 @@
+/**
+ * Estilos para indicador de diferencia de temperatura (WT-11)
+ * Muestra la diferencia entre temperatura actual y deseada
+ */
+
+/* Contenedor del indicador de diferencia */
+.diferencia-container {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #ecf0f1;
+}
+
+/* Texto de diferencia */
+.diferencia-texto {
+    font-size: 1.1em;
+    font-weight: 600;
+    margin-bottom: 10px;
+    transition: color 0.3s ease;
+}
+
+.diferencia-texto.frio {
+    color: #3498db;
+}
+
+.diferencia-texto.ok {
+    color: #2ecc71;
+}
+
+.diferencia-texto.calor {
+    color: #e74c3c;
+}
+
+/* Barra de progreso */
+.diferencia-barra-container {
+    background: #ecf0f1;
+    border-radius: 10px;
+    height: 12px;
+    overflow: hidden;
+    position: relative;
+}
+
+.diferencia-barra {
+    height: 100%;
+    border-radius: 10px;
+    transition: width 0.5s ease, background 0.3s ease;
+    min-width: 5%;
+}
+
+.diferencia-barra.frio {
+    background: linear-gradient(90deg, #3498db, #2980b9);
+}
+
+.diferencia-barra.ok {
+    background: linear-gradient(90deg, #2ecc71, #27ae60);
+}
+
+.diferencia-barra.calor {
+    background: linear-gradient(90deg, #e74c3c, #c0392b);
+}
+
+/* Marcador de objetivo en la barra */
+.diferencia-objetivo {
+    position: absolute;
+    right: 0;
+    top: -3px;
+    bottom: -3px;
+    width: 3px;
+    background: #2c3e50;
+    border-radius: 2px;
+}
