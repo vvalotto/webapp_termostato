@@ -1,0 +1,92 @@
+/**
+ * Estilos para selector de rango de tiempo (WT-15)
+ */
+
+/* Header de grafica con titulo y selector */
+.grafica-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.grafica-header .card-title {
+    margin: 0;
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+/* Selector de rango */
+.rango-selector {
+    display: flex;
+    gap: 5px;
+    flex-wrap: wrap;
+}
+
+.btn-rango {
+    padding: 8px 16px;
+    border: 2px solid #3498db;
+    background: white;
+    color: #3498db;
+    border-radius: 20px;
+    font-size: 0.85em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-rango:hover {
+    background: #ebf5fb;
+}
+
+.btn-rango.active {
+    background: #3498db;
+    color: white;
+}
+
+.btn-rango:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Indicador de carga */
+.grafica-cargando {
+    text-align: center;
+    padding: 20px;
+    color: #7f8c8d;
+    font-size: 1.1em;
+}
+
+.grafica-cargando .glyphicon {
+    margin-right: 8px;
+}
+
+/* Animacion de rotacion */
+.spin {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Responsive */
+@media (max-width: 767px) {
+    .grafica-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .rango-selector {
+        width: 100%;
+        justify-content: flex-start;
+    }
+
+    .btn-rango {
+        padding: 6px 12px;
+        font-size: 0.8em;
+    }
+}

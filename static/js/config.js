@@ -3,8 +3,8 @@
  * WT-23: Refactorizacion modular
  */
 /* exported INTERVALO_MS, UMBRAL_OBSOLETO_MS, VENTANA_TIEMPO_MS, TEMPERATURA_KEY,
-   CLIMATIZADOR_KEY, CONFIG_REINTENTOS, REGLAS_VALIDACION, TOOLTIPS_BATERIA,
-   ESTADOS_CONEXION */
+   CLIMATIZADOR_KEY, RANGO_PREFERENCIA_KEY, RANGOS_TIEMPO, CONFIG_REINTENTOS,
+   REGLAS_VALIDACION, TOOLTIPS_BATERIA, ESTADOS_CONEXION */
 
 // Intervalos de tiempo
 const INTERVALO_MS = 10000; // 10 segundos entre actualizaciones
@@ -14,6 +14,15 @@ const UMBRAL_OBSOLETO_MS = 30000; // 30 segundos para considerar datos obsoletos
 const VENTANA_TIEMPO_MS = 5 * 60 * 1000; // 5 minutos en milisegundos
 const TEMPERATURA_KEY = 'temperatura_historico';
 const CLIMATIZADOR_KEY = 'climatizador_historico';
+const RANGO_PREFERENCIA_KEY = 'grafica_rango_preferido';
+
+// WT-15: Rangos de tiempo disponibles para graficas
+const RANGOS_TIEMPO = {
+    '5min': { label: '5 min', ms: 5 * 60 * 1000, usaAPI: false },
+    '1h': { label: '1 hora', ms: 60 * 60 * 1000, usaAPI: true, limite: 60 },
+    '6h': { label: '6 horas', ms: 6 * 60 * 60 * 1000, usaAPI: true, limite: 360 },
+    '24h': { label: '24 horas', ms: 24 * 60 * 60 * 1000, usaAPI: true, limite: 1440 }
+};
 
 // WT-22: Configuracion de reintentos
 const CONFIG_REINTENTOS = {
