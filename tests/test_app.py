@@ -4,16 +4,12 @@ WT-26: Tests unitarios basicos
 
 pylint: disable=redefined-outer-name
 """
-import os
-import sys
 from unittest.mock import patch, Mock
 
 import pytest
 import requests
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-from lanzador import app  # noqa: E402  pylint: disable=wrong-import-position
+from webapp import app
 
 
 # Datos de ejemplo que devuelve la API
@@ -38,26 +34,26 @@ DATOS_HISTORIAL_VALIDOS = {
 def client():
     """Fixture que proporciona un cliente de pruebas Flask."""
     app.config['TESTING'] = True
-    with app.test_client() as client:
-        yield client
+    with app.test_client() as test_client:
+        yield test_client
 
 
 @pytest.fixture
 def reset_cache():
     """Fixture para limpiar el cache entre tests."""
-    import lanzador  # pylint: disable=import-outside-toplevel
-    lanzador.ultima_respuesta_valida = None
-    lanzador.ultimo_timestamp = None
+    import webapp  # pylint: disable=import-outside-toplevel
+    webapp.ultima_respuesta_valida = None
+    webapp.ultimo_timestamp = None
     yield
-    lanzador.ultima_respuesta_valida = None
-    lanzador.ultimo_timestamp = None
+    webapp.ultima_respuesta_valida = None
+    webapp.ultimo_timestamp = None
 
 
 @pytest.mark.usefixtures('reset_cache')
 class TestRutaIndex:
     """Tests para la ruta principal /"""
 
-    @patch('lanzador.requests.get')
+    @patch('webapp.requests.get')
     def test_index_con_api_funcionando(self, mock_get, client):
         """Test de ruta / con API funcionando correctamente."""
         # Configurar mock para simular respuesta exitosa de la API
@@ -76,7 +72,7 @@ class TestRutaIndex:
         assert b'24' in response.data  # temperatura_deseada
         assert b'ENCENDIDO' in response.data  # estado_climatizador
 
-    @patch('lanzador.requests.get')
+    @patch('webapp.requests.get')
     def test_index_con_api_caida(self, mock_get, client):
         """Test de ruta / con API caida (sin conexion)."""
         # Configurar mock para simular error de conexion
@@ -90,7 +86,7 @@ class TestRutaIndex:
         assert b'Dashboard Termostato' in response.data
         assert b'Error API' in response.data
 
-    @patch('lanzador.requests.get')
+    @patch('webapp.requests.get')
     def test_index_con_api_timeout(self, mock_get, client):
         """Test de ruta / con API timeout."""
         # Configurar mock para simular timeout
@@ -103,7 +99,7 @@ class TestRutaIndex:
         assert response.status_code == 200
         assert b'Error API' in response.data
 
-    @patch('lanzador.requests.get')
+    @patch('webapp.requests.get')
     def test_index_usa_cache_cuando_api_cae(self, mock_get, client):
         """Test que verifica el uso de cache cuando la API falla."""
         # Primera llamada: API funciona
@@ -128,7 +124,7 @@ class TestRutaIndex:
 class TestApiEstado:
     """Tests para el endpoint /api/estado"""
 
-    @patch('lanzador.requests.get')
+    @patch('webapp.requests.get')
     def test_api_estado_funcionando(self, mock_get, client):
         """Test de /api/estado con API funcionando."""
         mock_response = Mock()
@@ -144,7 +140,7 @@ class TestApiEstado:
         assert data['data']['temperatura_ambiente'] == 22
         assert data['from_cache'] is False
 
-    @patch('lanzador.requests.get')
+    @patch('webapp.requests.get')
     def test_api_estado_con_api_caida(self, mock_get, client):
         """Test de /api/estado con API caida y sin cache."""
         mock_get.side_effect = requests.exceptions.ConnectionError('No connection')
@@ -156,7 +152,7 @@ class TestApiEstado:
         assert data['success'] is False
         assert 'error' in data
 
-    @patch('lanzador.requests.get')
+    @patch('webapp.requests.get')
     def test_api_estado_usa_cache(self, mock_get, client):
         """Test de /api/estado retorna datos cacheados cuando API falla."""
         # Primera llamada exitosa
@@ -180,7 +176,7 @@ class TestApiEstado:
 class TestApiHistorial:
     """Tests para el endpoint /api/historial"""
 
-    @patch('lanzador.requests.get')
+    @patch('webapp.requests.get')
     def test_api_historial_funcionando(self, mock_get, client):
         """Test de /api/historial con API funcionando."""
         mock_response = Mock()
@@ -196,7 +192,7 @@ class TestApiHistorial:
         assert len(data['historial']) == 2
         assert data['total'] == 2
 
-    @patch('lanzador.requests.get')
+    @patch('webapp.requests.get')
     def test_api_historial_con_limite(self, mock_get, client):
         """Test de /api/historial con parametro limite."""
         mock_response = Mock()
@@ -212,7 +208,7 @@ class TestApiHistorial:
         call_url = mock_get.call_args[0][0]
         assert 'limite=100' in call_url
 
-    @patch('lanzador.requests.get')
+    @patch('webapp.requests.get')
     def test_api_historial_con_api_caida(self, mock_get, client):
         """Test de /api/historial con API caida."""
         mock_get.side_effect = requests.exceptions.ConnectionError('No connection')
