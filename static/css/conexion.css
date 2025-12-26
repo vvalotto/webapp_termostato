@@ -193,8 +193,27 @@ body.banner-visible .header-dashboard {
 }
 
 /* ==================== RESPONSIVE ==================== */
+/* WT-24: Dashboard responsive mejorado */
 
 @media (max-width: 767px) {
+    /* Estado de conexion con tamano tactil */
+    .estado-conexion {
+        padding: 10px 14px;
+        font-size: 0.85em;
+        min-height: 44px;
+    }
+
+    .timestamp-estado {
+        display: block;
+        margin-left: 0;
+        margin-top: 3px;
+        font-size: 0.8em;
+    }
+
+    .timestamp-estado::before {
+        display: none;
+    }
+
     .banner-conexion {
         padding: 10px 0;
     }
@@ -207,15 +226,47 @@ body.banner-visible .header-dashboard {
         font-size: 0.8em;
     }
 
+    /* Boton cerrar con tamano tactil */
+    .banner-cerrar {
+        min-width: 44px;
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-left: 10px;
+    }
+
     .notificacion-reconexion {
         top: auto;
         bottom: 20px;
         right: 10px;
         left: 10px;
         justify-content: center;
+        min-height: 44px;
     }
 
     body.banner-visible .header-dashboard {
         margin-top: 60px;
+    }
+}
+
+@media (max-width: 480px) {
+    .estado-conexion {
+        flex-direction: column;
+        text-align: center;
+        gap: 4px;
+    }
+
+    .banner-conexion .container {
+        padding: 0 10px;
+    }
+
+    .banner-mensaje {
+        font-size: 0.85em;
+    }
+
+    .banner-tiempo {
+        font-size: 0.75em;
+        padding: 3px 10px;
     }
 }

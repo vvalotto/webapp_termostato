@@ -86,3 +86,37 @@
 .tendencia-flecha.cambio {
     animation: tendencia-pulse 0.3s ease;
 }
+
+/* ==================== RESPONSIVE ==================== */
+/* WT-24: Dashboard responsive mejorado */
+
+@media (max-width: 767px) {
+    .tendencia-flecha {
+        font-size: 0.6em;
+        margin-left: 8px;
+    }
+
+    .tendencia-icono {
+        font-size: 0.55em;
+        margin-left: 6px;
+    }
+
+    .tendencia-texto {
+        font-size: 0.9em;
+        margin-top: 6px;
+    }
+}
+
+@media (max-width: 480px) {
+    .tendencia-flecha {
+        font-size: 0.55em;
+    }
+
+    .tendencia-icono {
+        font-size: 0.5em;
+    }
+
+    .tendencia-texto {
+        font-size: 0.85em;
+    }
+}

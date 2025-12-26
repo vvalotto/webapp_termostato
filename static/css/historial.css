@@ -74,19 +74,42 @@
 }
 
 /* Responsive */
+/* WT-24: Botones de tamano tactil (minimo 44px) */
 @media (max-width: 767px) {
     .grafica-header {
         flex-direction: column;
         align-items: flex-start;
     }
 
+    .grafica-header .card-title {
+        font-size: 1.1em;
+    }
+
     .rango-selector {
         width: 100%;
         justify-content: flex-start;
+        gap: 8px;
     }
 
     .btn-rango {
-        padding: 6px 12px;
+        padding: 10px 14px;
+        font-size: 0.85em;
+        min-height: 44px;
+        min-width: 44px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .btn-rango {
+        padding: 8px 10px;
         font-size: 0.8em;
+        flex: 1;
+    }
+
+    .rango-selector {
+        gap: 5px;
     }
 }
