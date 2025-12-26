@@ -8,7 +8,8 @@
    actualizarCardBateria, actualizarEstadoConexion, actualizarTimestamp,
    mostrarActualizando, inicializarBannerCerrar, actualizarIndicadorTendencia,
    actualizarGraficaTemperatura, actualizarGraficaClimatizador,
-   setUltimaActualizacion, getUltimaActualizacion, actualizarDiferencia, $ */
+   setUltimaActualizacion, getUltimaActualizacion, actualizarDiferencia,
+   inicializarSelectorRango, cambiarRangoGrafica, $ */
 /* exported detenerActualizacion */
 
 let intervalId = null;
@@ -144,6 +145,9 @@ function iniciarActualizacion() {
 
     // Inicializar indicador de diferencia (WT-11)
     inicializarDiferencia();
+
+    // Inicializar selector de rango de tiempo (WT-15)
+    inicializarSelectorRango(cambiarRangoGrafica);
 
     console.log('Actualizacion automatica iniciada (intervalo: ' + INTERVALO_MS + 'ms)');
 }

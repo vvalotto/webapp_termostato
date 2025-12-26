@@ -200,8 +200,20 @@
     <div class="row">
       <div class="col-md-12">
         <div class="dashboard-card card-grafica">
-          <h3 class="card-title">Evolución de Temperatura Ambiente</h3>
+          <div class="grafica-header">
+            <h3 class="card-title">Evolución de Temperatura Ambiente</h3>
+            <!-- WT-15: Selector de rango de tiempo -->
+            <div class="rango-selector" id="rango-selector">
+              <button type="button" class="btn-rango active" data-rango="5min">5 min</button>
+              <button type="button" class="btn-rango" data-rango="1h">1 hora</button>
+              <button type="button" class="btn-rango" data-rango="6h">6 horas</button>
+              <button type="button" class="btn-rango" data-rango="24h">24 horas</button>
+            </div>
+          </div>
           <div class="card-body">
+            <div id="grafica-cargando" class="grafica-cargando oculto">
+              <span class="glyphicon glyphicon-refresh spin"></span> Cargando historial...
+            </div>
             <canvas id="temperaturaChart"></canvas>
           </div>
         </div>
@@ -239,6 +251,7 @@
 <script src="{{ url_for('static', filename='js/bateria.js') }}"></script>
 <script src="{{ url_for('static', filename='js/tendencia.js') }}"></script>
 <script src="{{ url_for('static', filename='js/diferencia.js') }}"></script>
+<script src="{{ url_for('static', filename='js/historial.js') }}"></script>
 <!-- 5. Graficas -->
 <script src="{{ url_for('static', filename='js/graficas/config.js') }}"></script>
 <script src="{{ url_for('static', filename='js/graficas/temperatura.js') }}"></script>

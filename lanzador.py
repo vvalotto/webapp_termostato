@@ -6,7 +6,7 @@ import os
 
 from datetime import datetime
 
-from flask import Flask, render_template, jsonify
+from flask import Flask, render_template, jsonify, request
 from flask_bootstrap import Bootstrap
 from flask_moment import Moment
 import requests
@@ -79,6 +79,36 @@ def index():
         formulario.estado_climatizador = 'Error API'
 
     return render_template("index.html", form=formulario, timestamp=timestamp)
+
+
+@app.route("/api/historial")
+def api_historial():
+    """
+    Endpoint para obtener el historial de temperaturas desde la API backend (WT-15).
+
+    Query params:
+        limite: Número máximo de registros a obtener (default: 60)
+
+    Returns:
+        JSON con el historial de temperaturas o error 503 si no hay conexión.
+    """
+    limite = request.args.get('limite', 60, type=int)
+    try:
+        url = f"{URL_APP_API}/termostato/historial/?limite={limite}"
+        respuesta = requests.get(url, timeout=10)
+        respuesta.raise_for_status()
+        datos = respuesta.json()
+        return jsonify({
+            'success': True,
+            'historial': datos.get('historial', []),
+            'total': datos.get('total', 0)
+        })
+    except requests.exceptions.RequestException as e:
+        return jsonify({
+            'success': False,
+            'error': f'No se pudo obtener historial: {str(e)}',
+            'historial': []
+        }), 503
 
 
 @app.route("/api/estado")
