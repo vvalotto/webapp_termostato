@@ -8,7 +8,7 @@
    actualizarCardBateria, actualizarEstadoConexion, actualizarTimestamp,
    mostrarActualizando, inicializarBannerCerrar, actualizarIndicadorTendencia,
    actualizarGraficaTemperatura, actualizarGraficaClimatizador,
-   setUltimaActualizacion, getUltimaActualizacion, $ */
+   setUltimaActualizacion, getUltimaActualizacion, actualizarDiferencia, $ */
 /* exported detenerActualizacion */
 
 let intervalId = null;
@@ -44,6 +44,11 @@ function procesarDatosRecibidos(datosOriginales) {
             datosOriginales.temperatura_ambiente,
             datosOriginales.temperatura_deseada,
             datosOriginales.estado_climatizador
+        );
+        // WT-11: Actualizar indicador de diferencia
+        actualizarDiferencia(
+            datosOriginales.temperatura_ambiente,
+            datosOriginales.temperatura_deseada
         );
     }
 }
@@ -100,6 +105,20 @@ function inicializarTendencia() {
 }
 
 /**
+ * Inicializa el indicador de diferencia con valores del DOM (WT-11)
+ */
+function inicializarDiferencia() {
+    const tempAmbEl = document.getElementById('valor-temp-ambiente');
+    const tempDesEl = document.getElementById('valor-temp-deseada');
+
+    if (tempAmbEl && tempDesEl) {
+        const tempAmb = parseFloat(tempAmbEl.textContent) || 0;
+        const tempDes = parseFloat(tempDesEl.textContent) || 0;
+        actualizarDiferencia(tempAmb, tempDes);
+    }
+}
+
+/**
  * Inicia el ciclo de actualizacion automatica
  */
 function iniciarActualizacion() {
@@ -122,6 +141,9 @@ function iniciarActualizacion() {
 
     // Inicializar indicador de tendencia
     inicializarTendencia();
+
+    // Inicializar indicador de diferencia (WT-11)
+    inicializarDiferencia();
 
     console.log('Actualizacion automatica iniciada (intervalo: ' + INTERVALO_MS + 'ms)');
 }

@@ -129,6 +129,14 @@
               <label>Temperatura Deseada</label>
               <div class="metric-value"><span id="valor-temp-deseada">{{form.temperatura_deseada}}</span><span class="metric-unit">°C</span></div>
             </div>
+            <!-- WT-11: Indicador de diferencia de temperatura -->
+            <div class="diferencia-container">
+              <div id="diferencia-texto" class="diferencia-texto">Calculando...</div>
+              <div class="diferencia-barra-container">
+                <div id="diferencia-barra" class="diferencia-barra ok" style="width: 100%"></div>
+                <div class="diferencia-objetivo"></div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -230,6 +238,7 @@
 <!-- 4. Modulos de componentes UI -->
 <script src="{{ url_for('static', filename='js/bateria.js') }}"></script>
 <script src="{{ url_for('static', filename='js/tendencia.js') }}"></script>
+<script src="{{ url_for('static', filename='js/diferencia.js') }}"></script>
 <!-- 5. Graficas -->
 <script src="{{ url_for('static', filename='js/graficas/config.js') }}"></script>
 <script src="{{ url_for('static', filename='js/graficas/temperatura.js') }}"></script>
