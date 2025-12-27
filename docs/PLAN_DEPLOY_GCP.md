@@ -4,7 +4,9 @@
 
 Desplegar webapp_termostato (frontend) en Google Cloud Run con despliegue continuo desde GitHub.
 
-**Backend existente:** https://app-termostato-1090421346746.us-central1.run.app/
+**Frontend desplegado:** https://webapp-termostato-1090421346746.us-central1.run.app
+
+**Backend existente:** https://app-termostato-1090421346746.us-central1.run.app
 
 ## Arquitectura
 
@@ -186,11 +188,11 @@ git push origin master
 
 - [x] Paso 1: Verificar gcloud CLI
 - [x] Paso 2: Habilitar APIs
-- [ ] Paso 3: Crear Procfile
-- [ ] Paso 4: Subir cambios a GitHub
-- [ ] Paso 5: Configurar despliegue continuo
-- [ ] Paso 6: Verificar despliegue
-- [ ] Paso 7: Probar despliegue continuo
+- [x] Paso 3: Crear Procfile
+- [x] Paso 4: Subir cambios a GitHub
+- [x] Paso 5: Configurar despliegue continuo
+- [x] Paso 6: Verificar despliegue
+- [ ] Paso 7: Probar despliegue continuo (opcional)
 
 ---
 
@@ -244,3 +246,4 @@ No necesitas ejecutar ningun comando de `gcloud` para deploys rutinarios.
 
 *Plan actualizado el 2025-12-27*
 *Metodo: Despliegue continuo desde GitHub*
+*Estado: COMPLETADO*

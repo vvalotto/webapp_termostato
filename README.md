@@ -19,6 +19,17 @@ La aplicacion muestra en un **dashboard moderno tipo IoT**:
 - Grafica de historial del climatizador
 - Estado de conexion en tiempo real
 
+## Demo en Produccion
+
+La aplicacion esta desplegada en Google Cloud Run:
+
+| Componente | URL |
+|------------|-----|
+| **Frontend** | https://webapp-termostato-1090421346746.us-central1.run.app |
+| **Backend** | https://app-termostato-1090421346746.us-central1.run.app |
+
+Despliegue continuo desde GitHub: cada push a `master` actualiza automaticamente.
+
 ## Arquitectura
 
 ```
@@ -27,6 +38,15 @@ La aplicacion muestra en un **dashboard moderno tipo IoT**:
 |     (Frontend)      | ------> |     (Backend)       |
 |     Puerto 5001     |  REST   |     Puerto 5050     |
 +---------------------+         +---------------------+
+```
+
+### Arquitectura en Produccion (GCP)
+
+```
+GitHub (push) --> Cloud Build --> Cloud Run (Frontend)
+                                        |
+                                        v
+                                  Cloud Run (Backend)
 ```
 
 ## Estructura del Proyecto

@@ -41,6 +41,9 @@ Thumbs.db
 .env
 .env.local
 
+# MCP config (contiene credenciales)
+.mcp.json
+
 # Logs
 *.log
 
@@ -55,3 +58,9 @@ htmlcov/
 # Node.js
 node_modules/
 package-lock.json
+
+# Claude Code (configuracion local)
+.claude/settings.local.json
+
+# Quality reports (generados)
+quality/reports/
