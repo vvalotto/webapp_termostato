@@ -36,6 +36,15 @@ jobs:
           
           # 2. Sincronizar Documento de Arquitectura
           cp main_repo/docs/arquitectura.md wiki_repo/Arquitectura.md
+        
+          # 3. Sincronizar Documento de Calidad de Código
+          cp main_repo/docs/informe_calidad_detallado.md wiki_repo/calidad_codigo.
+          
+          # 4. Sincronizar Documento de Calidad de Diseño y Arquitectura
+          cp main_repo/docs/informe_diseno_arquitectura.md wiki_repo/calidad_diseno_arquitectura.md
+          
+          # 5. Sincronizar Historias de Usuario
+          cp main_repo/HISTORIAS_DE_USUARIO.md wiki_repo/historias_usuario.md
 
       - name: Commit y Push a la Wiki
         run: |
