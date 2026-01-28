@@ -130,3 +130,5 @@ classDiagram
 
 3.  **Validación en Capas**:
     *   El Frontend (`validacion.js`) valida rangos y tipos de datos antes de renderizar para evitar romper las gráficas con datos corruptos.
+  
+Fecha: 28/01/2026
