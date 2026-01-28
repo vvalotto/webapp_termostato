@@ -125,5 +125,3 @@ Hacer que las rutas dependan de esta abstracción, no de `requests` directamente
 Instanciar el servicio concreto en el arranque (`app.py` o configuración) e inyectarlo en las vistas.
 *   *Beneficio:* Permite testear las vistas usando un `MockTermostatoService` sin necesidad de conexión a internet ni backend real.
 
----
-*Informe generado por el Asistente de Arquitectura.*
