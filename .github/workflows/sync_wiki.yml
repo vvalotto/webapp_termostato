@@ -44,7 +44,7 @@ jobs:
           cp main_repo/docs/informe_diseno_arquitectura.md wiki_repo/calidad_diseno_arquitectura.md
           
           # 5. Sincronizar Documento de Historias de Usuario
-          cp main_repo/docs/historias_usuario.md wiki_repo/historias_usuario.md
+          cp main_repo/docs/historias_de_usuario.md wiki_repo/historias_usuario.md
           
           # 6. Sincronizar Documento de Reporte Consolidado de Calidad
           cp main_repo/docs/reporte_consolidado_calidad.md wiki_repo/reporte_consolidado_calidad.md     
