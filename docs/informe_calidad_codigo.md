@@ -73,3 +73,4 @@ La complejidad máxima detectada fue de **16** (24/12), superando el umbral idea
 ---
 *Informe generado por el Asistente de Calidad de Software.*
 Fecha: 28/01/2026
+---

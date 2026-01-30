@@ -545,3 +545,4 @@ WT-23 (Refactor JS) ──> WT-15 (Ventana tiempo)
 
 *Documento actualizado el 2025-12-24*
 *Códigos sincronizados con proyecto Jira WT (webapp_termostato)*
+---
