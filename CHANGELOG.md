@@ -5,6 +5,28 @@ Todos los cambios notables de este proyecto seran documentados en este archivo.
 El formato esta basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
+## [3.0.0-dev] - 2026-02-24 (en desarrollo)
+
+### Agregado
+
+#### US-001: Refactorizar Backend en Arquitectura por Capas
+
+- **Application Factory** `create_app(config_name)` — elimina estado global al nivel de modulo
+- **Capa de configuracion** `webapp/config.py` — jerarquia Config / Development / Testing / Production
+- **Capa de modelos** `webapp/models/termostato_dto.py` — TypedDict `TermostatoEstadoDTO`
+- **Capa de cache** `webapp/cache/` — interfaz `Cache` (ABC) + `MemoryCache` thread-safe
+- **Capa de servicios** `webapp/services/` — interfaz `ApiClient` (ABC) + `RequestsApiClient` + `TermostatoService`
+- **Capa de rutas** `webapp/routes/` — Blueprints: `main_bp`, `api_bp`, `health_bp`
+- **Tests unitarios** — 30 tests para cache, api_client y servicio (sin @patch, inyeccion directa)
+- **Tests de integracion** — 16 tests HTTP end-to-end con Flask test client
+- **Tests BDD** — 10 escenarios Gherkin con pytest-bdd validando criterios de aceptacion
+
+### Metricas US-001
+
+- Pylint: 10.00/10 | CC: 1.37 | MI: grado A | Coverage: 95% | Tests: 69/69
+
+---
+
 ## [2.0.0] - 2025-12-26
 
 ### Agregado
