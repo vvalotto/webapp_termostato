@@ -62,28 +62,88 @@ Detalla la estructura interna de la aplicación Flask y la organización modular
 
 ### 3.1 Componentes del Servidor (Flask)
 
+Arquitectura por capas implementada en **US-001** (Application Factory + DIP).
+
 ```mermaid
 C4Component
-    title Diagrama de Componentes - Backend (Flask)
+    title Diagrama de Componentes - Backend (Flask) v3.0
 
     Container(spa, "Cliente Browser", "JavaScript")
-    System_Ext(api_ext, "API Externa", "HTTP")
+    System_Ext(api_ext, "API Termostato", "HTTP/JSON")
 
     Container_Boundary(flask_app, "Flask Application") {
-        Component(routes, "Rutas (Views)", "webapp/__init__.py", "Maneja /, /api/estado, /health")
-        Component(forms, "Formularios", "webapp/forms.py", "Definición de WTForms para la UI")
-        Component(service, "Servicio de Datos", "obtener_estado_termostato()", "Lógica de petición HTTP y Caché en memoria")
-        Component(templates, "Templates", "Jinja2 / HTML", "Estructura visual base")
+        Component(factory, "Application Factory", "webapp/__init__.py", "create_app() — ensambla capas e inyecta dependencias")
+        Component(config, "Configuracion", "webapp/config.py", "Config / DevelopmentConfig / TestingConfig / ProductionConfig")
+
+        Component(main_bp, "Blueprint Principal", "webapp/routes/main.py", "GET / — Dashboard SSR con Jinja2")
+        Component(api_bp, "Blueprint API", "webapp/routes/api.py", "GET /api/estado, GET /api/historial")
+        Component(health_bp, "Blueprint Health", "webapp/routes/health.py", "GET /health — estado frontend y backend")
+
+        Component(service, "TermostatoService", "webapp/services/termostato_service.py", "Logica de negocio: estado, historial, health. DI via constructor.")
+        Component(api_client, "RequestsApiClient", "webapp/services/api_client.py", "Cliente HTTP — implementa ApiClient ABC")
+        Component(cache, "MemoryCache", "webapp/cache/memory_cache.py", "Cache fallback thread-safe — implementa Cache ABC")
+
+        Component(forms, "TermostatoForm", "webapp/forms.py", "Solo renderizado Jinja2, sin validacion WTF")
+        Component(templates, "Templates", "Jinja2 / HTML", "index.html, base.html, 404.html, 500.html")
     }
 
-    Rel(spa, routes, "Solicita datos JSON", "/api/estado")
-    Rel(routes, forms, "Instancia")
-    Rel(routes, service, "Invoca")
-    Rel(routes, templates, "Renderiza")
-    Rel(service, api_ext, "Requests GET", "Timeout 5s")
+    Rel(spa, main_bp, "Carga inicial", "HTTPS/HTML")
+    Rel(spa, api_bp, "Polling AJAX cada 10s", "JSON")
+    Rel(main_bp, service, "obtener_estado()")
+    Rel(main_bp, forms, "Instancia para renderizado")
+    Rel(main_bp, templates, "Renderiza")
+    Rel(api_bp, service, "obtener_estado() / obtener_historial()")
+    Rel(health_bp, service, "health_check()")
+    Rel(service, api_client, "get(path, timeout)")
+    Rel(service, cache, "get / set 'estado'")
+    Rel(api_client, api_ext, "HTTP GET", "Timeout configurable")
+    Rel(factory, config, "Carga configuracion por entorno")
+    Rel(factory, service, "Instancia y adjunta como app.termostato_service")
 ```
 
-### 3.2 Componentes del Cliente (JavaScript)
+### 3.2 Diagrama de Clases — Inyeccion de Dependencias
+
+Muestra las interfaces (ABCs) y sus implementaciones concretas que permiten el principio de inversion de dependencias (DIP).
+
+```mermaid
+classDiagram
+    class Cache {
+        <<ABC>>
+        +get(key: str) Any
+        +set(key: str, value: Any) None
+        +clear() None
+    }
+    class MemoryCache {
+        -_store: dict
+        -_lock: Lock
+        +get(key) Any
+        +set(key, value) None
+        +clear() None
+    }
+    class ApiClient {
+        <<ABC>>
+        +get(path: str, **kwargs) dict
+    }
+    class RequestsApiClient {
+        -_base_url: str
+        -_timeout: int
+        +get(path, **kwargs) dict
+    }
+    class TermostatoService {
+        -_api_client: ApiClient
+        -_cache: Cache
+        +obtener_estado() tuple
+        +obtener_historial(limite) dict
+        +health_check() dict
+    }
+
+    Cache <|-- MemoryCache : implementa
+    ApiClient <|-- RequestsApiClient : implementa
+    TermostatoService --> ApiClient : depende de
+    TermostatoService --> Cache : depende de
+```
+
+### 3.3 Componentes del Cliente (JavaScript)
 
 La lógica de cliente ha sido refactorizada en módulos (ES5/ES6 pattern) para mantenibilidad.
 
@@ -119,16 +179,29 @@ classDiagram
 
 ## Decisiones de Diseño Clave
 
-1.  **Caché en Memoria (Fallback)**:
-    *   El servidor Flask mantiene una variable global `ultima_respuesta_valida`.
-    *   Si la API externa falla (timeout o error 500), Flask sirve los últimos datos conocidos con un flag `from_cache=True`.
-    *   Esto permite que el frontend detecte la desconexión pero siga mostrando datos útiles.
+1.  **Caché en Memoria como Fallback (MemoryCache)**:
+    *   `MemoryCache` (en `webapp/cache/memory_cache.py`) almacena la última respuesta válida bajo la clave `'estado'` como tupla `(datos, timestamp)`.
+    *   Implementa la interfaz `Cache` (ABC), permitiendo sustituirla por Redis u otro backend sin modificar `TermostatoService`.
+    *   Usa `threading.Lock` para garantizar seguridad en entornos multi-hilo (Gunicorn).
+    *   El servicio **siempre** intenta obtener datos frescos del backend; el caché solo actúa si la API lanza `RequestException` (fallback, no cache-first).
+    *   El flag `from_cache=True` en la respuesta JSON permite que el frontend detecte la desconexión pero siga mostrando datos útiles.
 
-2.  **Polling vs WebSockets**:
+2.  **Inversión de Dependencias (DIP)**:
+    *   `TermostatoService` depende de las abstracciones `ApiClient` y `Cache`, no de implementaciones concretas.
+    *   Esto permite inyectar mocks en tests sin `@patch` y facilita cambiar la implementación del cliente HTTP o del caché de forma independiente (ver ADR-001, ADR-002).
+
+3.  **Application Factory**:
+    *   `create_app(config_name)` en `webapp/__init__.py` elimina el estado global a nivel de módulo.
+    *   Permite instanciar múltiples apps con configuraciones distintas (`'testing'`, `'development'`, `'production'`), esencial para tests aislados.
+
+4.  **Polling vs WebSockets**:
     *   Se optó por **Polling (AJAX)** cada 10 segundos en lugar de WebSockets por simplicidad y robustez ante desconexiones inestables.
-    *   El módulo `api.js` implementa una lógica de "Backoff exponencial" para reintentos si la conexión falla.
+    *   El módulo `api.js` implementa una lógica de backoff exponencial para reintentos si la conexión falla.
 
-3.  **Validación en Capas**:
-    *   El Frontend (`validacion.js`) valida rangos y tipos de datos antes de renderizar para evitar romper las gráficas con datos corruptos.
-  
-Fecha: 28/01/2026
+5.  **Validación en Capas**:
+    *   El frontend (`validacion.js`) valida rangos y tipos de datos antes de renderizar para evitar romper las gráficas con datos corruptos.
+
+---
+
+Fecha creación: 28/01/2026
+Última actualización: 2026-02-24 (US-001 — Arquitectura por capas)
