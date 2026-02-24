@@ -77,8 +77,14 @@ Leer del archivo de configuración `.claude/skills/implement-us/config.json` la 
 Organizar en secciones:
 1. **Componentes principales** (según patrón arquitectónico)
 2. **Integración** (conexión con componentes existentes)
-3. **Tests** (unitarios, integración, BDD)
-4. **Validación** (quality gates)
+
+> **IMPORTANTE:** No incluir secciones de Tests ni Validación en el plan.
+> - Tests unitarios → gestionados por **Fase 4**
+> - Tests de integración → gestionados por **Fase 5**
+> - Validación BDD → gestionada por **Fase 6**
+> - Quality gates → gestionados por **Fase 7**
+>
+> Incluirlos en el plan generaría trabajo duplicado.
 
 ### 4. Estimar tiempo por tarea
 
@@ -121,17 +127,7 @@ Usar estimaciones estándar según tipo de componente y complejidad de la US.
 - [ ] Integrar con Coordinator (5 min)
   - Agregar panel a main_coordinator.py
 
-### 4. Tests
-- [ ] tests/test_estado_modelo.py (15 min)
-- [ ] tests/test_estado_vista.py (20 min)
-- [ ] tests/test_estado_controlador.py (20 min)
-- [ ] tests/test_estado_integracion.py (15 min)
-
-### 5. Validación
-- [ ] Ejecutar escenarios BDD (5 min)
-- [ ] Quality gates (Pylint, CC, MI) (5 min)
-
-**Estado:** 0/12 tareas completadas
+**Estado:** 0/8 tareas completadas
 ```
 
 ### Ejemplo 2: FastAPI - Endpoint REST
@@ -164,16 +160,7 @@ Usar estimaciones estándar según tipo de componente y complejidad de la US.
   - Registrar UserService en dependencies.py
   - Configurar repository con session de BD
 
-### 3. Tests
-- [ ] tests/unit/test_user_service.py (15 min)
-- [ ] tests/integration/test_user_repository.py (15 min)
-- [ ] tests/api/test_users_endpoint.py (20 min)
-
-### 4. Validación
-- [ ] Ejecutar escenarios BDD (5 min)
-- [ ] Quality gates (Pylint, coverage) (5 min)
-
-**Estado:** 0/10 tareas completadas
+**Estado:** 0/6 tareas completadas
 ```
 
 ### Ejemplo 3: Flask REST - API Endpoint
@@ -223,18 +210,7 @@ Usar estimaciones estándar según tipo de componente y complejidad de la US.
 - [ ] Configurar Configurador singleton (5 min)
   - Inyectar repository en endpoints
 
-### 4. Tests
-- [ ] tests/unit/test_product_model.py (10 min)
-- [ ] tests/unit/test_product_repository.py (15 min)
-- [ ] tests/integration/test_products_api.py (25 min)
-  - Tests con Flask test client
-  - Fixtures: app, client
-
-### 5. Validación
-- [ ] Ejecutar escenarios BDD (5 min)
-- [ ] Quality gates (Pylint ≥8.0, Coverage ≥95%) (5 min)
-
-**Estado:** 0/11 tareas completadas
+**Estado:** 0/6 tareas completadas
 ```
 
 ### Ejemplo 4: Flask Webapp - Página de Productos
@@ -305,23 +281,7 @@ Usar estimaciones estándar según tipo de componente y complejidad de la US.
   - Development: http://localhost:5050
   - Production: variable de entorno
 
-### 5. Tests
-- [ ] tests/unit/test_api_client_products.py (15 min)
-  - Test métodos get_products, get_product
-  - Mock requests con responses library
-- [ ] tests/integration/test_products_routes.py (25 min)
-  - Test routes con Flask test client
-  - Mock APIClient.get_products()
-  - Assert template rendering
-  - Assert status codes (200, 404)
-
-### 6. Validación
-- [ ] Ejecutar escenarios BDD (5 min)
-- [ ] Quality gates (Pylint ≥8.0, Coverage ≥90%) (5 min)
-  - Coverage solo backend (routes + api_client)
-  - JavaScript NO incluido en coverage
-
-**Estado:** 0/14 tareas completadas
+**Estado:** 0/8 tareas completadas
 ```
 
 ### Ejemplo 5: Generic Python - Módulo de Procesamiento
@@ -350,16 +310,7 @@ Usar estimaciones estándar según tipo de componente y complejidad de la US.
 - [ ] src/processor/exceptions.py (10 min)
   - Excepciones custom para errores de procesamiento
 
-### 3. Tests
-- [ ] tests/test_validator.py (15 min)
-- [ ] tests/test_transformer.py (15 min)
-- [ ] tests/test_processor.py (20 min)
-
-### 4. Validación
-- [ ] Ejecutar escenarios BDD (5 min)
-- [ ] Quality gates (Pylint, coverage) (5 min)
-
-**Estado:** 0/8 tareas completadas
+**Estado:** 0/4 tareas completadas
 ```
 
 ---
@@ -388,14 +339,10 @@ El plan generado debe seguir esta estructura:
 - [ ] Descripción de integración (XX min)
   - Puntos de conexión con componentes existentes
 
-### 3. Tests
-- [ ] tests/test_*.py por cada componente (XX min)
-
-### 4. Validación
-- [ ] Ejecutar escenarios BDD (5 min)
-- [ ] Quality gates (5 min)
-
 **Estado:** 0/N tareas completadas
+
+> Tests → Fase 4 (unitarios), Fase 5 (integración), Fase 6 (BDD)
+> Quality gates → Fase 7
 ```
 
 ---
@@ -424,20 +371,10 @@ El plan generado debe seguir esta estructura:
 - Service con múltiple lógica: 25-35 min
 - Repository con queries complejas: 20-30 min
 
-**Tests:**
-- Test unitario simple: 10-15 min
-- Test con mocks: 15-20 min
-- Test de integración: 15-25 min
-
-**Validación:**
-- BDD: 5 min
-- Quality gates: 5 min
-
 ### Organización de Tareas
 
 1. **Secuencia bottom-up:** Empezar por capas inferiores (modelo, schema) hacia superiores (controlador, router)
 2. **Dependencias primero:** Componentes sin dependencias antes que los que dependen de otros
-3. **Tests después de implementación:** Tests inmediatamente después del componente correspondiente
 
 ---
 
