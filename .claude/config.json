@@ -1,0 +1,24 @@
+{
+  "version": "1.0",
+  "profile": "flask-webapp",
+  "profile_name": "Flask WebApp",
+  "installed_at": "2026-02-24T11:43:08.359275",
+  "architecture_pattern": "bff",
+  "test_framework": "pytest",
+  "component_types": [
+    "Blueprint",
+    "Template",
+    "Form",
+    "Static"
+  ],
+  "patterns": [
+    "BFF (Backend for Frontend)",
+    "Server-Side Rendering",
+    "MVC"
+  ],
+  "variables": {
+    "base_class": "object",
+    "test_base_class": "unittest.TestCase",
+    "import_test_framework": "import pytest"
+  }
+}
