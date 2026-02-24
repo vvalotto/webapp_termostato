@@ -41,6 +41,8 @@ npm install
 **Ejecutar tests:**
 ```bash
 pytest
+pytest tests/test_app.py::TestRutaIndex::test_index_con_api_funcionando  # test especifico
+pytest -k "test_index"  # por patron de nombre
 ```
 
 **Ejecutar con Gunicorn (produccion):**
@@ -50,33 +52,11 @@ gunicorn app:app
 
 ## Architecture
 
-```
-webapp_termostato/
-├── app.py               # Punto de entrada (importa de webapp)
-├── webapp/              # Aplicacion Flask
-│   ├── __init__.py      # App Flask + rutas
-│   ├── forms.py         # Definicion de formularios (TermostatoForm)
-│   ├── templates/       # Templates Jinja2
-│   │   ├── base.html    # Template base con navbar y layout
-│   │   ├── index.html   # Pagina principal del termostato
-│   │   ├── 404.html     # Pagina de error 404
-│   │   └── 500.html     # Pagina de error 500
-│   └── static/          # Archivos estaticos
-│       ├── css/         # Estilos CSS modulares
-│       ├── js/          # JavaScript modular
-│       └── proyecto.ico # Favicon
-├── tests/               # Tests unitarios
-│   ├── __init__.py
-│   └── test_app.py      # Tests de rutas y API
-├── docs/                # Documentacion
-├── quality/             # Sistema de calidad de codigo
-│   ├── scripts/         # Scripts de analisis
-│   └── reports/         # Reportes generados
-└── .claude/             # Configuracion de Claude Code
-    ├── settings.json    # Quality gates y hooks
-    ├── agents/          # Agentes especializados
-    └── commands/        # Comandos personalizados
-```
+**Rutas expuestas por el frontend:**
+- `/` - Pagina principal (SSR con Flask + polling AJAX)
+- `/api/estado` - Endpoint JSON para actualizacion AJAX sin recarga (cada 10s)
+- `/api/historial?limite=N` - Historial de temperaturas (default: 60 registros)
+- `/health` - Health check del sistema (verifica conexion con backend)
 
 **API Backend:**
 - El backend REST API corre en `http://localhost:5050` (configurable via `API_URL` o `URL_APP_API`)
@@ -84,6 +64,15 @@ webapp_termostato/
   - `/termostato/` - Estado completo del termostato
   - `/termostato/historial/` - Historial de temperaturas
   - `/comprueba/` - Health check del backend
+
+**Cache en memoria (webapp/__init__.py):**
+`ultima_respuesta_valida` y `ultimo_timestamp` son variables globales de modulo que almacenan la ultima respuesta exitosa. Si el backend falla, se sirven datos cacheados con `from_cache=True`. Este cache se reinicia al reiniciar el servidor. Los tests deben usar la fixture `reset_cache` para limpiar el estado entre pruebas.
+
+**TermostatoForm (forms.py):**
+Se usa exclusivamente para renderizado en plantillas, no para validacion. Los campos se asignan como atributos de instancia dinamicamente en la vista (no como datos de formulario WTF).
+
+**JavaScript modular (static/js/):**
+Los modulos JS se cargan via `<script>` en `index.html` en orden de dependencias: `config.js` → modulos de feature (api.js, bateria.js, conexion.js, etc.) → `app.js` (coordinador). `app.js` asume que todos los demas modulos ya estan cargados. Las graficas estan en `static/js/graficas/` (temperatura.js, climatizador.js).
 
 ## Language
 
