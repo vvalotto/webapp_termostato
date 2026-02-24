@@ -11,13 +11,6 @@ from webapp.cache.memory_cache import MemoryCache
 from webapp.services.api_client import RequestsApiClient
 from webapp.services.termostato_service import TermostatoService
 
-# Version del frontend
-VERSION = '2.0.0'
-
-# Extensiones Flask (inicializadas sin app para el factory pattern)
-bootstrap = Bootstrap()
-moment = Moment()
-
 
 def create_app(config_name: str = 'default') -> Flask:
     """Crear y configurar la aplicación Flask.
@@ -40,8 +33,8 @@ def create_app(config_name: str = 'default') -> Flask:
     app.config.from_object(config[config_name])
 
     # Inicializar extensiones
-    bootstrap.init_app(app)
-    moment.init_app(app)
+    Bootstrap(app)
+    Moment(app)
 
     # Crear infraestructura
     cache = MemoryCache()
