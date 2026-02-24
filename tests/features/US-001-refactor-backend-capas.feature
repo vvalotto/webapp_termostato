@@ -1,4 +1,3 @@
-# language: es
 Feature: Refactorizar backend en arquitectura por capas (US-001)
   Como desarrollador del equipo
   Quiero refactorizar el backend en arquitectura por capas
