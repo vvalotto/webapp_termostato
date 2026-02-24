@@ -52,27 +52,46 @@ gunicorn app:app
 
 ## Architecture
 
-**Rutas expuestas por el frontend:**
-- `/` - Pagina principal (SSR con Flask + polling AJAX)
-- `/api/estado` - Endpoint JSON para actualizacion AJAX sin recarga (cada 10s)
-- `/api/historial?limite=N` - Historial de temperaturas (default: 60 registros)
-- `/health` - Health check del sistema (verifica conexion con backend)
+**Patron BFF (Backend for Frontend) con arquitectura por capas** (desde US-001 v3.0.0):
 
-**API Backend:**
-- El backend REST API corre en `http://localhost:5050` (configurable via `API_URL` o `URL_APP_API`)
-- Endpoints consumidos:
-  - `/termostato/` - Estado completo del termostato
-  - `/termostato/historial/` - Historial de temperaturas
-  - `/comprueba/` - Health check del backend
+```
+webapp/
+├── __init__.py           # Application Factory: create_app(config_name)
+├── config.py             # Config / DevelopmentConfig / TestingConfig / ProductionConfig
+├── forms.py              # TermostatoForm (solo renderizado, sin validacion WTF)
+├── models/               # DTOs: TermostatoEstadoDTO (TypedDict)
+├── cache/                # Interfaz Cache (ABC) + MemoryCache (threading.Lock)
+├── services/             # ApiClient (ABC) + RequestsApiClient + TermostatoService
+└── routes/               # Blueprints: main_bp (/) + api_bp (/api) + health_bp (/health)
+```
 
-**Cache en memoria (webapp/__init__.py):**
-`ultima_respuesta_valida` y `ultimo_timestamp` son variables globales de modulo que almacenan la ultima respuesta exitosa. Si el backend falla, se sirven datos cacheados con `from_cache=True`. Este cache se reinicia al reiniciar el servidor. Los tests deben usar la fixture `reset_cache` para limpiar el estado entre pruebas.
+**Application Factory:**
+`create_app(config_name)` en `webapp/__init__.py` instancia `MemoryCache`, `RequestsApiClient` y `TermostatoService`, los ensambla y los adjunta a `app.termostato_service`. Usar `create_app('testing')` en fixtures de tests.
+
+**Rutas expuestas:**
+- `GET /` - Dashboard SSR (main_bp → TermostatoService.obtener_estado())
+- `GET /api/estado` - JSON `{success, data, timestamp, from_cache}` (api_bp)
+- `GET /api/historial?limite=N` - JSON con historial (api_bp, default: 60)
+- `GET /health` - JSON `{status, frontend, backend}` (health_bp)
+
+**Cache como fallback (MemoryCache):**
+El servicio siempre intenta obtener datos frescos del backend. Solo usa el cache si la API lanza `RequestException`. El cache se limpia llamando `app.termostato_service._cache.clear()` en los tests. Fixture `reset_cache` en `test_app.py` hace esto automaticamente.
+
+**Inyeccion de dependencias:**
+`TermostatoService(api_client=..., cache=...)` acepta cualquier implementacion de `ApiClient` y `Cache` (ABCs en `webapp/services/api_client.py` y `webapp/cache/cache_interface.py`). Los tests unitarios inyectan mocks directamente sin `@patch`.
+
+**Tests:**
+- `tests/test_app.py` — tests de rutas con `create_app('testing')` y `@patch('webapp.services.api_client.requests.get')`
+- `tests/test_cache.py`, `tests/test_api_client.py`, `tests/test_services.py` — tests unitarios de capas
+- `tests/integration/` — tests HTTP end-to-end con Flask test client
+- `tests/step_defs/` — step definitions BDD (pytest-bdd 8.x)
+- `tests/features/` — escenarios Gherkin
 
 **TermostatoForm (forms.py):**
-Se usa exclusivamente para renderizado en plantillas, no para validacion. Los campos se asignan como atributos de instancia dinamicamente en la vista (no como datos de formulario WTF).
+Se usa exclusivamente para renderizado en plantillas, no para validacion. Los campos se asignan como atributos de instancia dinamicamente en la vista.
 
 **JavaScript modular (static/js/):**
-Los modulos JS se cargan via `<script>` en `index.html` en orden de dependencias: `config.js` → modulos de feature (api.js, bateria.js, conexion.js, etc.) → `app.js` (coordinador). `app.js` asume que todos los demas modulos ya estan cargados. Las graficas estan en `static/js/graficas/` (temperatura.js, climatizador.js).
+Los modulos JS se cargan via `<script>` en `index.html` en orden de dependencias: `config.js` → modulos de feature (api.js, bateria.js, conexion.js, etc.) → `app.js` (coordinador). Las graficas estan en `static/js/graficas/`.
 
 ## Language
 
