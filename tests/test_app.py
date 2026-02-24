@@ -9,7 +9,7 @@ from unittest.mock import patch, Mock
 import pytest
 import requests
 
-from webapp import app
+from webapp import create_app
 
 
 # Datos de ejemplo que devuelve la API
@@ -38,29 +38,31 @@ DATOS_HEALTH_BACKEND = {
 
 
 @pytest.fixture
-def client():
+def app():
+    """Fixture que crea una instancia de la app Flask para testing."""
+    return create_app('testing')
+
+
+@pytest.fixture
+def client(app):
     """Fixture que proporciona un cliente de pruebas Flask."""
-    app.config['TESTING'] = True
     with app.test_client() as test_client:
         yield test_client
 
 
 @pytest.fixture
-def reset_cache():
+def reset_cache(app):
     """Fixture para limpiar el cache entre tests."""
-    import webapp  # pylint: disable=import-outside-toplevel
-    webapp.ultima_respuesta_valida = None
-    webapp.ultimo_timestamp = None
+    app.termostato_service._cache.clear()
     yield
-    webapp.ultima_respuesta_valida = None
-    webapp.ultimo_timestamp = None
+    app.termostato_service._cache.clear()
 
 
 @pytest.mark.usefixtures('reset_cache')
 class TestRutaIndex:
     """Tests para la ruta principal /"""
 
-    @patch('webapp.requests.get')
+    @patch('webapp.services.api_client.requests.get')
     def test_index_con_api_funcionando(self, mock_get, client):
         """Test de ruta / con API funcionando correctamente."""
         # Configurar mock para simular respuesta exitosa de la API
@@ -79,7 +81,7 @@ class TestRutaIndex:
         assert b'24' in response.data  # temperatura_deseada
         assert b'ENCENDIDO' in response.data  # estado_climatizador
 
-    @patch('webapp.requests.get')
+    @patch('webapp.services.api_client.requests.get')
     def test_index_con_api_caida(self, mock_get, client):
         """Test de ruta / con API caida (sin conexion)."""
         # Configurar mock para simular error de conexion
@@ -93,7 +95,7 @@ class TestRutaIndex:
         assert b'Dashboard Termostato' in response.data
         assert b'Error API' in response.data
 
-    @patch('webapp.requests.get')
+    @patch('webapp.services.api_client.requests.get')
     def test_index_con_api_timeout(self, mock_get, client):
         """Test de ruta / con API timeout."""
         # Configurar mock para simular timeout
@@ -106,7 +108,7 @@ class TestRutaIndex:
         assert response.status_code == 200
         assert b'Error API' in response.data
 
-    @patch('webapp.requests.get')
+    @patch('webapp.services.api_client.requests.get')
     def test_index_usa_cache_cuando_api_cae(self, mock_get, client):
         """Test que verifica el uso de cache cuando la API falla."""
         # Primera llamada: API funciona
@@ -131,7 +133,7 @@ class TestRutaIndex:
 class TestApiEstado:
     """Tests para el endpoint /api/estado"""
 
-    @patch('webapp.requests.get')
+    @patch('webapp.services.api_client.requests.get')
     def test_api_estado_funcionando(self, mock_get, client):
         """Test de /api/estado con API funcionando."""
         mock_response = Mock()
@@ -147,7 +149,7 @@ class TestApiEstado:
         assert data['data']['temperatura_ambiente'] == 22
         assert data['from_cache'] is False
 
-    @patch('webapp.requests.get')
+    @patch('webapp.services.api_client.requests.get')
     def test_api_estado_con_api_caida(self, mock_get, client):
         """Test de /api/estado con API caida y sin cache."""
         mock_get.side_effect = requests.exceptions.ConnectionError('No connection')
@@ -159,7 +161,7 @@ class TestApiEstado:
         assert data['success'] is False
         assert 'error' in data
 
-    @patch('webapp.requests.get')
+    @patch('webapp.services.api_client.requests.get')
     def test_api_estado_usa_cache(self, mock_get, client):
         """Test de /api/estado retorna datos cacheados cuando API falla."""
         # Primera llamada exitosa
@@ -183,7 +185,7 @@ class TestApiEstado:
 class TestApiHistorial:
     """Tests para el endpoint /api/historial"""
 
-    @patch('webapp.requests.get')
+    @patch('webapp.services.api_client.requests.get')
     def test_api_historial_funcionando(self, mock_get, client):
         """Test de /api/historial con API funcionando."""
         mock_response = Mock()
@@ -199,7 +201,7 @@ class TestApiHistorial:
         assert len(data['historial']) == 2
         assert data['total'] == 2
 
-    @patch('webapp.requests.get')
+    @patch('webapp.services.api_client.requests.get')
     def test_api_historial_con_limite(self, mock_get, client):
         """Test de /api/historial con parametro limite."""
         mock_response = Mock()
@@ -215,7 +217,7 @@ class TestApiHistorial:
         call_url = mock_get.call_args[0][0]
         assert 'limite=100' in call_url
 
-    @patch('webapp.requests.get')
+    @patch('webapp.services.api_client.requests.get')
     def test_api_historial_con_api_caida(self, mock_get, client):
         """Test de /api/historial con API caida."""
         mock_get.side_effect = requests.exceptions.ConnectionError('No connection')
@@ -231,7 +233,7 @@ class TestApiHistorial:
 class TestHealth:
     """Tests para el endpoint /health (WT-27)"""
 
-    @patch('webapp.requests.get')
+    @patch('webapp.services.api_client.requests.get')
     def test_health_con_backend_ok(self, mock_get, client):
         """Test de /health con backend funcionando."""
         mock_response = Mock()
@@ -251,7 +253,7 @@ class TestHealth:
         assert data['backend']['version'] == '1.1.0'
         assert data['backend']['uptime_seconds'] == 3600
 
-    @patch('webapp.requests.get')
+    @patch('webapp.services.api_client.requests.get')
     def test_health_con_backend_caido(self, mock_get, client):
         """Test de /health con backend no disponible."""
         mock_get.side_effect = requests.exceptions.ConnectionError('No connection')
@@ -265,7 +267,7 @@ class TestHealth:
         assert data['backend']['status'] == 'unavailable'
         assert 'error' in data['backend']
 
-    @patch('webapp.requests.get')
+    @patch('webapp.services.api_client.requests.get')
     def test_health_con_backend_timeout(self, mock_get, client):
         """Test de /health con backend timeout."""
         mock_get.side_effect = requests.exceptions.Timeout('Timeout')
