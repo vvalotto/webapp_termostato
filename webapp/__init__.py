@@ -8,8 +8,17 @@ from flask_moment import Moment
 
 from webapp.config import config
 from webapp.cache.memory_cache import MemoryCache
-from webapp.services.api_client import RequestsApiClient
+from webapp.services.api_client import MockApiClient, RequestsApiClient
 from webapp.services.termostato_service import TermostatoService
+
+# Datos fijos usados por MockApiClient en entorno testing
+_DATOS_MOCK_TESTING = {
+    'temperatura_ambiente': 22,
+    'temperatura_deseada': 24,
+    'estado_climatizador': 'encendido',
+    'carga_bateria': 3.8,
+    'indicador': 'NORMAL',
+}
 
 
 def create_app(config_name: str = 'default') -> Flask:
@@ -38,10 +47,13 @@ def create_app(config_name: str = 'default') -> Flask:
 
     # Crear infraestructura
     cache = MemoryCache()
-    api_client = RequestsApiClient(
-        base_url=app.config['URL_APP_API'],
-        timeout=app.config['API_TIMEOUT']
-    )
+    if app.config.get('TESTING'):
+        api_client = MockApiClient(_DATOS_MOCK_TESTING)
+    else:
+        api_client = RequestsApiClient(
+            base_url=app.config['URL_APP_API'],
+            timeout=app.config['API_TIMEOUT']
+        )
 
     # Crear servicio e inyectar dependencias
     app.termostato_service = TermostatoService(  # type: ignore[attr-defined]

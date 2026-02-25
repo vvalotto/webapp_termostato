@@ -6,10 +6,8 @@ Migra la función obtener_estado_termostato() de webapp/__init__.py.
 from datetime import datetime
 from typing import Optional, Tuple
 
-import requests
-
 from webapp.cache.cache_interface import Cache
-from webapp.services.api_client import ApiClient
+from webapp.services.api_client import ApiClient, ApiError
 
 # Clave usada para almacenar el estado en el caché
 _CACHE_KEY_ESTADO = 'estado'
@@ -55,7 +53,7 @@ class TermostatoService:
             timestamp = datetime.utcnow().isoformat()
             self._cache.set(_CACHE_KEY_ESTADO, (datos, timestamp))
             return datos, timestamp, False
-        except requests.exceptions.RequestException:
+        except ApiError:
             cached = self._cache.get(_CACHE_KEY_ESTADO)
             if cached:
                 datos_cache, timestamp_cache = cached

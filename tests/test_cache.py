@@ -3,6 +3,7 @@ Tests unitarios para la capa de caché.
 Valida MemoryCache de forma aislada, sin dependencias externas.
 """
 import threading
+import time
 
 import pytest
 
@@ -78,6 +79,61 @@ class TestMemoryCacheClear:
         cache.set('k', 'despues')
 
         assert cache.get('k') == 'despues'
+
+
+class TestMemoryCacheTTL:
+    """Tests de expiración por TTL."""
+
+    def test_valor_con_ttl_se_recupera_antes_de_expirar(self, cache):
+        """get() retorna el valor si no ha expirado el TTL."""
+        cache.set('clave', 'valor', ttl=60)
+        assert cache.get('clave') == 'valor'
+
+    def test_valor_sin_ttl_no_expira(self, cache):
+        """Valor sin TTL no expira."""
+        cache.set('clave', 'valor')
+        assert cache.get('clave') == 'valor'
+
+    def test_valor_con_ttl_expirado_retorna_none(self, cache):
+        """get() retorna None y elimina la clave cuando el TTL expiró."""
+        cache.set('clave', 'valor', ttl=1)
+        time.sleep(1.1)
+        assert cache.get('clave') is None
+
+    def test_valor_expirado_se_elimina_del_cache(self, cache):
+        """Tras expirar, la clave ya no existe (segunda llamada también None)."""
+        cache.set('clave', 'valor', ttl=1)
+        time.sleep(1.1)
+        cache.get('clave')   # Elimina la entrada
+        assert cache.get('clave') is None
+
+    def test_sobreescribir_actualiza_ttl(self, cache):
+        """set() con nuevo TTL reemplaza el TTL anterior."""
+        cache.set('clave', 'viejo', ttl=1)
+        cache.set('clave', 'nuevo', ttl=60)   # Renueva el TTL
+        time.sleep(1.1)
+        assert cache.get('clave') == 'nuevo'  # No expiró
+
+
+class TestMemoryCacheDelete:
+    """Tests del método delete()."""
+
+    def test_delete_elimina_clave_existente(self, cache):
+        """delete() elimina una clave almacenada."""
+        cache.set('clave', 'valor')
+        cache.delete('clave')
+        assert cache.get('clave') is None
+
+    def test_delete_clave_inexistente_no_lanza_error(self, cache):
+        """delete() de clave inexistente no lanza excepción."""
+        cache.delete('no_existe')  # No debe fallar
+
+    def test_delete_no_afecta_otras_claves(self, cache):
+        """delete() solo elimina la clave especificada."""
+        cache.set('k1', 'v1')
+        cache.set('k2', 'v2')
+        cache.delete('k1')
+        assert cache.get('k2') == 'v2'
 
 
 class TestMemoryCacheThreadSafety:

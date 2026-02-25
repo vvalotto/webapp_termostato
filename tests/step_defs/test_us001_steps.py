@@ -3,14 +3,13 @@ Step definitions BDD para US-001: Refactorizar Backend en Arquitectura por Capas
 Valida el comportamiento del sistema desde la perspectiva del usuario y del desarrollador.
 """
 import json
-from unittest.mock import Mock, patch
 
 import pytest
-import requests
 from pytest_bdd import scenarios, given, when, then, parsers
 
 from webapp import create_app
 from webapp.cache.memory_cache import MemoryCache
+from webapp.services.api_client import ApiConnectionError, MockApiClient
 from webapp.services.termostato_service import TermostatoService
 
 # ---------------------------------------------------------------------------
@@ -42,45 +41,16 @@ DATOS_HEALTH = {
     'uptime_seconds': 3600,
 }
 
-_PATCH_TARGET = 'webapp.services.api_client.requests.get'
-
 
 # ---------------------------------------------------------------------------
-# Helpers de patch
+# Helper: inyectar MockApiClient en el servicio del contexto
 # ---------------------------------------------------------------------------
 
-def _crear_mock_exitoso(urls_registradas):
-    """Devuelve una función side_effect que responde según la URL."""
-    def _mock(url, timeout=5, **kwargs):
-        urls_registradas.append(url)
-        respuesta = Mock()
-        respuesta.raise_for_status.return_value = None
-        if '/termostato/historial/' in url:
-            respuesta.json.return_value = DATOS_HISTORIAL
-        elif '/comprueba/' in url:
-            respuesta.json.return_value = DATOS_HEALTH
-        else:
-            respuesta.json.return_value = DATOS_ESTADO
-        return respuesta
-    return _mock
-
-
-def _iniciar_patch(ctx, *args, **kwargs):
-    """Inicia un patch, lo registra en ctx para limpieza automática."""
-    p = patch(*args, **kwargs)
-    mock = p.start()
-    ctx['patches_activos'].append(p)
-    return mock
-
-
-def _detener_ultimo_patch(ctx):
-    """Detiene el último patch iniciado."""
-    if ctx['patches_activos']:
-        p = ctx['patches_activos'].pop()
-        try:
-            p.stop()
-        except RuntimeError:
-            pass
+def _inyectar_mock(ctx, mock_data, raise_error=None):
+    """Reemplaza el api_client del servicio con un MockApiClient."""
+    ctx['app'].termostato_service._api_client = MockApiClient(
+        mock_data, raise_error=raise_error
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -94,8 +64,6 @@ def ctx():
         'app': None,
         'client': None,
         'response': None,
-        'urls_llamadas': [],
-        'patches_activos': [],
         'mock_api_client': None,
         'mock_cache': None,
         'servicio': None,
@@ -104,15 +72,9 @@ def ctx():
 
 
 @pytest.fixture(autouse=True)
-def limpiar_patches(ctx):
-    """Garantiza que todos los patches se detengan al finalizar el test."""
+def limpiar_cache(ctx):
+    """Limpia el caché del servicio al finalizar cada test."""
     yield
-    for p in list(ctx['patches_activos']):
-        try:
-            p.stop()
-        except RuntimeError:
-            pass
-    ctx['patches_activos'].clear()
     if ctx.get('app'):
         ctx['app'].termostato_service._cache.clear()
 
@@ -142,46 +104,39 @@ def servicio_disponible(ctx):
 @given("la API backend responde con datos válidos del termostato")
 def api_responde_datos_validos(ctx):
     """Mock que devuelve DATOS_ESTADO para /termostato/."""
-    _iniciar_patch(ctx, _PATCH_TARGET,
-                   side_effect=_crear_mock_exitoso(ctx['urls_llamadas']))
+    _inyectar_mock(ctx, DATOS_ESTADO)
 
 
 @given("la API backend responde con historial de temperaturas")
 def api_responde_historial(ctx):
     """Mock que devuelve DATOS_HISTORIAL para /termostato/historial/."""
-    _iniciar_patch(ctx, _PATCH_TARGET,
-                   side_effect=_crear_mock_exitoso(ctx['urls_llamadas']))
+    _inyectar_mock(ctx, DATOS_HISTORIAL)
 
 
 @given("la API backend está disponible y responde al health check")
 def api_responde_health(ctx):
     """Mock que devuelve DATOS_HEALTH para /comprueba/."""
-    _iniciar_patch(ctx, _PATCH_TARGET,
-                   side_effect=_crear_mock_exitoso(ctx['urls_llamadas']))
+    _inyectar_mock(ctx, DATOS_HEALTH)
 
 
 @given("la API backend respondió exitosamente en la última petición")
 def api_respondio_exitosamente(ctx):
     """Hace una petición exitosa para poblar el caché."""
-    _iniciar_patch(ctx, _PATCH_TARGET,
-                   side_effect=_crear_mock_exitoso(ctx['urls_llamadas']))
+    _inyectar_mock(ctx, DATOS_ESTADO)
     ctx['client'].get('/api/estado')  # Pobla el caché
-    _detener_ultimo_patch(ctx)  # Detiene el patch exitoso antes del siguiente given
 
 
 @given("la API backend ya no está disponible")
 def api_ya_no_disponible(ctx):
     """Configura el mock para fallar con ConnectionError."""
-    _iniciar_patch(ctx, _PATCH_TARGET,
-                   side_effect=requests.exceptions.ConnectionError('sin conexión'))
+    _inyectar_mock(ctx, {}, raise_error=ApiConnectionError)
 
 
 @given("la API backend no está disponible y no hay datos en caché")
 def api_no_disponible_sin_cache(ctx):
     """La API falla y el caché está explícitamente vacío."""
     ctx['app'].termostato_service._cache.clear()
-    _iniciar_patch(ctx, _PATCH_TARGET,
-                   side_effect=requests.exceptions.ConnectionError('sin conexión'))
+    _inyectar_mock(ctx, {}, raise_error=ApiConnectionError)
 
 
 @given("existe una implementación mock del cliente API")
@@ -327,7 +282,8 @@ def json_contiene_historial(ctx):
 @then('la petición al backend incluye el parámetro "limite=10"')
 def peticion_incluye_limite(ctx):
     """Verifica que la URL llamada al backend incluye el parámetro limite."""
-    assert any('limite=10' in url for url in ctx['urls_llamadas'])
+    last_path = ctx['app'].termostato_service._api_client.last_path
+    assert last_path is not None and 'limite=10' in last_path
 
 
 @then('la respuesta JSON contiene "status" igual a "ok"')

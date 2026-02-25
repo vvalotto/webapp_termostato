@@ -1,18 +1,20 @@
 """
 Tests de integración para webapp_termostato.
 Validan el flujo HTTP completo: TestClient → Blueprint → TermostatoService → MemoryCache.
-Solo se mockea la llamada HTTP externa (requests.get), el resto es real.
+
+US-002: Reemplazados @patch por inyección directa de MockApiClient.
+El servicio inyectado en create_app('testing') es MockApiClient por defecto.
+Para escenarios de error se swapea el api_client directamente.
 """
 import json
-from unittest.mock import Mock, patch
 
 import pytest
-import requests
 
 from webapp import create_app
+from webapp.services.api_client import ApiConnectionError, ApiTimeoutError, MockApiClient
 
 # ---------------------------------------------------------------------------
-# Respuestas simuladas del backend externo
+# Datos de mock para distintos escenarios
 # ---------------------------------------------------------------------------
 
 RESPUESTA_ESTADO = {
@@ -37,23 +39,6 @@ RESPUESTA_HEALTH = {
     'uptime_seconds': 3600,
 }
 
-_PATCH_TARGET = 'webapp.services.api_client.requests.get'
-
-
-def _mock_get_exitoso(url, timeout=5, **kwargs):
-    """Simula requests.get devolviendo respuesta válida según URL."""
-    respuesta = Mock()
-    respuesta.raise_for_status.return_value = None
-
-    if '/termostato/historial/' in url:
-        respuesta.json.return_value = RESPUESTA_HISTORIAL
-    elif '/comprueba/' in url:
-        respuesta.json.return_value = RESPUESTA_HEALTH
-    else:
-        respuesta.json.return_value = RESPUESTA_ESTADO
-
-    return respuesta
-
 
 # ---------------------------------------------------------------------------
 # Fixtures
@@ -61,8 +46,10 @@ def _mock_get_exitoso(url, timeout=5, **kwargs):
 
 @pytest.fixture
 def app():
-    """Aplicacion Flask de testing con estado limpio."""
+    """Aplicación Flask de testing con MockApiClient (datos de estado) y caché limpio."""
     aplicacion = create_app('testing')
+    # Inyectar mock con datos de estado (comportamiento por defecto de testing)
+    aplicacion.termostato_service._api_client = MockApiClient(RESPUESTA_ESTADO)
     yield aplicacion
     aplicacion.termostato_service._cache.clear()
 
@@ -73,6 +60,24 @@ def cliente(app):
     return app.test_client()
 
 
+@pytest.fixture
+def app_historial():
+    """App con MockApiClient configurado para retornar datos de historial."""
+    aplicacion = create_app('testing')
+    aplicacion.termostato_service._api_client = MockApiClient(RESPUESTA_HISTORIAL)
+    yield aplicacion
+    aplicacion.termostato_service._cache.clear()
+
+
+@pytest.fixture
+def app_health():
+    """App con MockApiClient configurado para retornar datos de health."""
+    aplicacion = create_app('testing')
+    aplicacion.termostato_service._api_client = MockApiClient(RESPUESTA_HEALTH)
+    yield aplicacion
+    aplicacion.termostato_service._cache.clear()
+
+
 # ---------------------------------------------------------------------------
 # Tests de integración: flujo completo HTTP
 # ---------------------------------------------------------------------------
@@ -80,36 +85,31 @@ def cliente(app):
 class TestIntegracionRutaPrincipal:
     """Flujo: GET / → main_bp → TermostatoService → render template."""
 
-    @patch(_PATCH_TARGET, side_effect=_mock_get_exitoso)
-    def test_index_renderiza_con_datos_reales(self, _mock, cliente):
+    def test_index_renderiza_con_datos_reales(self, cliente):
         """La ruta principal renderiza datos del servicio real."""
         respuesta = cliente.get('/')
-
         assert respuesta.status_code == 200
 
-    @patch(_PATCH_TARGET,
-           side_effect=requests.exceptions.ConnectionError('sin conexión'))
-    def test_index_responde_200_aunque_api_caiga(self, _mock, cliente):
+    def test_index_responde_200_aunque_api_caiga(self, app, cliente):
         """La ruta / responde 200 aunque la API esté caída (muestra estado de error)."""
+        app.termostato_service._api_client = MockApiClient(
+            {}, raise_error=ApiConnectionError
+        )
         respuesta = cliente.get('/')
-
         assert respuesta.status_code == 200
 
-    @patch(_PATCH_TARGET, side_effect=_mock_get_exitoso)
-    def test_index_llama_api_en_cada_peticion(self, mock_get, cliente):
+    def test_index_llama_api_en_cada_peticion(self, app, cliente):
         """Cada petición a / llama al backend (caché es solo fallback ante fallos)."""
         cliente.get('/')
         cliente.get('/')
 
-        # El servicio siempre pide datos frescos; la caché solo actúa si la API cae
-        assert mock_get.call_count == 2
+        assert app.termostato_service._api_client.call_count == 2
 
 
 class TestIntegracionApiEstado:
     """Flujo: GET /api/estado → api_bp → TermostatoService → JSON."""
 
-    @patch(_PATCH_TARGET, side_effect=_mock_get_exitoso)
-    def test_api_estado_retorna_json_valido(self, _mock, cliente):
+    def test_api_estado_retorna_json_valido(self, cliente):
         """GET /api/estado retorna JSON con todos los campos del termostato."""
         respuesta = cliente.get('/api/estado')
 
@@ -120,32 +120,30 @@ class TestIntegracionApiEstado:
         assert datos['temperatura_ambiente'] == 21.5
         assert datos['indicador'] == 'NORMAL'
 
-    @patch(_PATCH_TARGET, side_effect=_mock_get_exitoso)
-    def test_api_estado_from_cache_es_false_en_respuesta_fresca(self, _mock, cliente):
+    def test_api_estado_from_cache_es_false_en_respuesta_fresca(self, cliente):
         """Datos frescos: from_cache debe ser False."""
         respuesta = cliente.get('/api/estado')
         datos = json.loads(respuesta.data)
-
         assert datos.get('from_cache') is False
 
-    @patch(_PATCH_TARGET,
-           side_effect=requests.exceptions.ConnectionError('sin conexión'))
-    def test_api_estado_retorna_503_sin_cache(self, _mock, cliente):
+    def test_api_estado_retorna_503_sin_cache(self, app, cliente):
         """Si la API falla y no hay caché, /api/estado retorna 503."""
+        app.termostato_service._api_client = MockApiClient(
+            {}, raise_error=ApiConnectionError
+        )
         respuesta = cliente.get('/api/estado')
-
         assert respuesta.status_code == 503
 
-    def test_api_estado_sirve_cache_cuando_api_cae(self, cliente):
+    def test_api_estado_sirve_cache_cuando_api_cae(self, app, cliente):
         """Si la API falla pero hay caché, retorna datos con from_cache=True."""
-        # Primera petición: poblar caché con API funcionando
-        with patch(_PATCH_TARGET, side_effect=_mock_get_exitoso):
-            cliente.get('/api/estado')
+        # Primera petición: poblar caché
+        cliente.get('/api/estado')
 
-        # Segunda petición: API caída — debe usar caché
-        with patch(_PATCH_TARGET,
-                   side_effect=requests.exceptions.ConnectionError('sin conexión')):
-            respuesta = cliente.get('/api/estado')
+        # Swap: API caída
+        app.termostato_service._api_client = MockApiClient(
+            {}, raise_error=ApiConnectionError
+        )
+        respuesta = cliente.get('/api/estado')
 
         assert respuesta.status_code == 200
         datos = json.loads(respuesta.data)
@@ -155,29 +153,30 @@ class TestIntegracionApiEstado:
 class TestIntegracionApiHistorial:
     """Flujo: GET /api/historial → api_bp → TermostatoService → JSON."""
 
-    @patch(_PATCH_TARGET, side_effect=_mock_get_exitoso)
-    def test_historial_retorna_lista(self, _mock, cliente):
+    def test_historial_retorna_lista(self, app_historial):
         """GET /api/historial retorna JSON con campo historial."""
-        respuesta = cliente.get('/api/historial')
+        with app_historial.test_client() as c:
+            respuesta = c.get('/api/historial')
 
         assert respuesta.status_code == 200
         datos = json.loads(respuesta.data)
         assert 'historial' in datos
         assert len(datos['historial']) == 2
 
-    @patch(_PATCH_TARGET, side_effect=_mock_get_exitoso)
-    def test_historial_acepta_parametro_limite(self, mock_get, cliente):
+    def test_historial_acepta_parametro_limite(self, app_historial):
         """GET /api/historial?limite=10 pasa el parámetro al backend."""
-        cliente.get('/api/historial?limite=10')
+        with app_historial.test_client() as c:
+            c.get('/api/historial?limite=10')
 
-        url_llamada = mock_get.call_args[0][0]
-        assert 'limite=10' in url_llamada
+        assert 'limite=10' in app_historial.termostato_service._api_client.last_path
 
-    @patch(_PATCH_TARGET,
-           side_effect=requests.exceptions.ConnectionError('sin conexión'))
-    def test_historial_retorna_503_cuando_api_cae(self, _mock, cliente):
+    def test_historial_retorna_503_cuando_api_cae(self, app_historial):
         """GET /api/historial retorna 503 si el backend no responde."""
-        respuesta = cliente.get('/api/historial')
+        app_historial.termostato_service._api_client = MockApiClient(
+            {}, raise_error=ApiConnectionError
+        )
+        with app_historial.test_client() as c:
+            respuesta = c.get('/api/historial')
 
         assert respuesta.status_code == 503
 
@@ -185,28 +184,32 @@ class TestIntegracionApiHistorial:
 class TestIntegracionHealth:
     """Flujo: GET /health → health_bp → TermostatoService.health_check() → JSON."""
 
-    @patch(_PATCH_TARGET, side_effect=_mock_get_exitoso)
-    def test_health_retorna_status_ok(self, _mock, cliente):
+    def test_health_retorna_status_ok(self, app_health):
         """GET /health retorna status ok del backend."""
-        respuesta = cliente.get('/health')
+        with app_health.test_client() as c:
+            respuesta = c.get('/health')
 
         assert respuesta.status_code == 200
         datos = json.loads(respuesta.data)
         assert datos['status'] == 'ok'
 
-    @patch(_PATCH_TARGET,
-           side_effect=requests.exceptions.ConnectionError('sin conexión'))
-    def test_health_retorna_503_cuando_backend_cae(self, _mock, cliente):
+    def test_health_retorna_503_cuando_backend_cae(self, app_health):
         """GET /health retorna 503 si el backend no está disponible."""
-        respuesta = cliente.get('/health')
+        app_health.termostato_service._api_client = MockApiClient(
+            {}, raise_error=ApiConnectionError
+        )
+        with app_health.test_client() as c:
+            respuesta = c.get('/health')
 
         assert respuesta.status_code == 503
 
-    @patch(_PATCH_TARGET,
-           side_effect=requests.exceptions.Timeout('timeout'))
-    def test_health_retorna_503_en_timeout(self, _mock, cliente):
+    def test_health_retorna_503_en_timeout(self, app_health):
         """GET /health retorna 503 si el backend no responde a tiempo."""
-        respuesta = cliente.get('/health')
+        app_health.termostato_service._api_client = MockApiClient(
+            {}, raise_error=ApiTimeoutError
+        )
+        with app_health.test_client() as c:
+            respuesta = c.get('/health')
 
         assert respuesta.status_code == 503
 
@@ -214,8 +217,7 @@ class TestIntegracionHealth:
 class TestIntegracionCacheServiceInteraccion:
     """Tests que validan la interacción real entre TermostatoService y MemoryCache."""
 
-    @patch(_PATCH_TARGET, side_effect=_mock_get_exitoso)
-    def test_cache_se_popula_tras_peticion_exitosa(self, _mock, app, cliente):
+    def test_cache_se_popula_tras_peticion_exitosa(self, app, cliente):
         """Después de GET /api/estado, el caché del servicio tiene datos."""
         cliente.get('/api/estado')
 
@@ -227,11 +229,10 @@ class TestIntegracionCacheServiceInteraccion:
         cache = app.termostato_service._cache
         assert cache.get('estado') is None
 
-    @patch(_PATCH_TARGET, side_effect=_mock_get_exitoso)
-    def test_clear_cache_fuerza_nueva_peticion(self, mock_get, app, cliente):
+    def test_clear_cache_fuerza_nueva_peticion(self, app, cliente):
         """Limpiar el caché fuerza una nueva petición al backend."""
         cliente.get('/api/estado')
         app.termostato_service._cache.clear()
         cliente.get('/api/estado')
 
-        assert mock_get.call_count == 2
+        assert app.termostato_service._api_client.call_count == 2

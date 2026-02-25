@@ -6,7 +6,7 @@ from datetime import datetime
 
 from flask import Blueprint, jsonify, current_app
 
-import requests as req_lib
+from webapp.services.api_client import ApiError
 
 # Versión del frontend — debe coincidir con webapp/__init__.py
 VERSION = '2.0.0'
@@ -46,7 +46,7 @@ def health():
             }
         }), 200
 
-    except req_lib.exceptions.RequestException as e:
+    except ApiError as e:
         return jsonify({
             'status': 'degraded',
             'timestamp': timestamp,
