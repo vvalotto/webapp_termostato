@@ -5,7 +5,7 @@ Rutas: GET /api/estado, GET /api/historial
 """
 from flask import Blueprint, jsonify, request, current_app
 
-import requests as req_lib
+from webapp.services.api_client import ApiError
 
 api_bp = Blueprint('api', __name__, url_prefix='/api')
 
@@ -60,7 +60,7 @@ def api_historial():
             'historial': datos.get('historial', []),
             'total': datos.get('total', 0)
         })
-    except req_lib.exceptions.RequestException as e:
+    except ApiError as e:
         return jsonify({
             'success': False,
             'error': f'No se pudo obtener historial: {str(e)}',

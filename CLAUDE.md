@@ -75,17 +75,24 @@ webapp/
 - `GET /health` - JSON `{status, frontend, backend}` (health_bp)
 
 **Cache como fallback (MemoryCache):**
-El servicio siempre intenta obtener datos frescos del backend. Solo usa el cache si la API lanza `RequestException`. El cache se limpia llamando `app.termostato_service._cache.clear()` en los tests. Fixture `reset_cache` en `test_app.py` hace esto automaticamente.
+El servicio siempre intenta obtener datos frescos del backend. Solo usa el cache si la API lanza `ApiError`. El cache se limpia llamando `app.termostato_service._cache.clear()` en los tests. `MemoryCache.set(key, value, ttl=None)` acepta TTL en segundos; sin TTL el valor no expira.
+
+**Excepciones custom (desde US-002):**
+`ApiError` (base) → `ApiConnectionError`, `ApiTimeoutError`. Las rutas capturan `ApiError` para retornar 503. No usar `requests.exceptions.*` fuera de `api_client.py`.
 
 **Inyeccion de dependencias:**
-`TermostatoService(api_client=..., cache=...)` acepta cualquier implementacion de `ApiClient` y `Cache` (ABCs en `webapp/services/api_client.py` y `webapp/cache/cache_interface.py`). Los tests unitarios inyectan mocks directamente sin `@patch`.
+`TermostatoService(api_client=..., cache=...)` acepta cualquier implementacion de `ApiClient` y `Cache` (ABCs en `webapp/services/api_client.py` y `webapp/cache/cache_interface.py`). Los tests inyectan mocks directamente — no usar `@patch` en tests de rutas o servicios.
+
+**MockApiClient (desde US-002):**
+`MockApiClient(mock_data, raise_error=None)` — cliente de test con `call_count`, `last_path`, y `raise_error`. `create_app('testing')` inyecta `MockApiClient` automaticamente. Para escenarios de error: `app.termostato_service._api_client = MockApiClient({}, raise_error=ApiConnectionError)`.
 
 **Tests:**
-- `tests/test_app.py` — tests de rutas con `create_app('testing')` y `@patch('webapp.services.api_client.requests.get')`
+- `tests/test_app.py` — tests de rutas con `create_app('testing')` (sin `@patch`)
 - `tests/test_cache.py`, `tests/test_api_client.py`, `tests/test_services.py` — tests unitarios de capas
-- `tests/integration/` — tests HTTP end-to-end con Flask test client
-- `tests/step_defs/` — step definitions BDD (pytest-bdd 8.x)
+- `tests/integration/` — tests HTTP end-to-end con Flask test client y MockApiClient
+- `tests/step_defs/` — step definitions BDD (pytest-bdd 8.x): US-001 y US-002
 - `tests/features/` — escenarios Gherkin
+- `tests/.pylintrc` — suprime W0621/W0212 (falsos positivos de pytest fixtures)
 
 **TermostatoForm (forms.py):**
 Se usa exclusivamente para renderizado en plantillas, no para validacion. Los campos se asignan como atributos de instancia dinamicamente en la vista.

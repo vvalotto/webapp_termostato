@@ -4,9 +4,9 @@ Usa mocks inyectados directamente (sin @patch) para validar la lógica
 de negocio de forma aislada de la infraestructura.
 """
 import pytest
-import requests
 
 from webapp.cache.memory_cache import MemoryCache
+from webapp.services.api_client import ApiConnectionError, ApiTimeoutError
 from webapp.services.termostato_service import TermostatoService
 
 # Datos de ejemplo reutilizados en los tests
@@ -45,17 +45,17 @@ class MockApiClientExitoso:
 
 
 class MockApiClientFallido:
-    """Mock de ApiClient que siempre lanza ConnectionError."""
+    """Mock de ApiClient que siempre lanza ApiConnectionError."""
 
     def get(self, path, **kwargs):
-        raise requests.exceptions.ConnectionError('Sin conexión')
+        raise ApiConnectionError('Sin conexión')
 
 
 class MockApiClientTimeout:
-    """Mock de ApiClient que siempre lanza Timeout."""
+    """Mock de ApiClient que siempre lanza ApiTimeoutError."""
 
     def get(self, path, **kwargs):
-        raise requests.exceptions.Timeout('Timeout')
+        raise ApiTimeoutError('Timeout')
 
 
 @pytest.fixture
@@ -169,8 +169,8 @@ class TestObtenerHistorial:
         assert any('limite=100' in ruta for ruta in rutas_llamadas)
 
     def test_lanza_excepcion_cuando_api_falla(self, servicio_caido):
-        """Lanza RequestException si el backend no responde."""
-        with pytest.raises(requests.exceptions.RequestException):
+        """Lanza ApiConnectionError si el backend no responde."""
+        with pytest.raises(ApiConnectionError):
             servicio_caido.obtener_historial()
 
 
@@ -186,13 +186,13 @@ class TestHealthCheck:
         assert resultado['uptime_seconds'] == 3600
 
     def test_lanza_excepcion_cuando_backend_no_responde(self, servicio_caido):
-        """Lanza RequestException si el backend no está disponible."""
-        with pytest.raises(requests.exceptions.RequestException):
+        """Lanza ApiConnectionError si el backend no está disponible."""
+        with pytest.raises(ApiConnectionError):
             servicio_caido.health_check()
 
     def test_lanza_excepcion_en_timeout(self, cache):
-        """Lanza Timeout si el backend no responde a tiempo."""
+        """Lanza ApiTimeoutError si el backend no responde a tiempo."""
         servicio = TermostatoService(MockApiClientTimeout(), cache)
 
-        with pytest.raises(requests.exceptions.Timeout):
+        with pytest.raises(ApiTimeoutError):
             servicio.health_check()

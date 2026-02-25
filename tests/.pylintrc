@@ -1,0 +1,4 @@
+[MESSAGES CONTROL]
+# W0621: redefined-outer-name — falso positivo de pytest fixtures
+# W0212: protected-access — los tests acceden intencionalmente a atributos internos
+disable=redefined-outer-name,protected-access

@@ -21,16 +21,27 @@ class Cache(ABC):
             key: Clave del valor a recuperar.
 
         Returns:
-            El valor almacenado, o None si no existe.
+            El valor almacenado, o None si no existe o expiró.
         """
 
     @abstractmethod
-    def set(self, key: str, value: Any) -> None:
+    def set(self, key: str, value: Any, ttl: Optional[int] = None) -> None:
         """Almacenar un valor en el caché.
 
         Args:
             key: Clave bajo la que almacenar el valor.
             value: Valor a almacenar.
+            ttl: Time-to-live en segundos. None = sin expiración.
+        """
+
+    @abstractmethod
+    def delete(self, key: str) -> None:
+        """Eliminar una clave del caché.
+
+        No lanza error si la clave no existe.
+
+        Args:
+            key: Clave a eliminar.
         """
 
     @abstractmethod
