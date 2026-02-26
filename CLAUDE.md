@@ -40,9 +40,10 @@ npm install
 
 **Ejecutar tests:**
 ```bash
-pytest
-pytest tests/test_app.py::TestRutaIndex::test_index_con_api_funcionando  # test especifico
-pytest -k "test_index"  # por patron de nombre
+pytest                                                                      # todos los tests + coverage (configurado en pytest.ini)
+pytest tests/test_app.py::TestRutaIndex::test_index_con_api_funcionando    # test especifico
+pytest -k "test_index"                                                      # por patron de nombre
+pytest --no-cov                                                             # sin coverage report
 ```
 
 **Ejecutar con Gunicorn (produccion):**
@@ -66,13 +67,18 @@ webapp/
 ```
 
 **Application Factory:**
-`create_app(config_name)` en `webapp/__init__.py` instancia `MemoryCache`, `RequestsApiClient` y `TermostatoService`, los ensambla y los adjunta a `app.termostato_service`. Usar `create_app('testing')` en fixtures de tests.
+`create_app(config_name)` en `webapp/__init__.py` instancia `MemoryCache`, `RequestsApiClient` y `TermostatoService`, los ensambla y los adjunta a `app.termostato_service`. Usar `create_app('testing')` en fixtures de tests. Variables de entorno relevantes: `SECRET_KEY`, `API_URL` (alias de `URL_APP_API`) para la URL del backend.
 
 **Rutas expuestas:**
 - `GET /` - Dashboard SSR (main_bp → TermostatoService.obtener_estado())
 - `GET /api/estado` - JSON `{success, data, timestamp, from_cache}` (api_bp)
 - `GET /api/historial?limite=N` - JSON con historial (api_bp, default: 60)
 - `GET /health` - JSON `{status, frontend, backend}` (health_bp)
+
+**Endpoints backend consumidos por `TermostatoService`:**
+- `GET /termostato/` — estado del termostato
+- `GET /termostato/historial/?limite=N` — historial de temperaturas
+- `GET /comprueba/` — health check del backend
 
 **Cache como fallback (MemoryCache):**
 El servicio siempre intenta obtener datos frescos del backend. Solo usa el cache si la API lanza `ApiError`. El cache se limpia llamando `app.termostato_service._cache.clear()` en los tests. `MemoryCache.set(key, value, ttl=None)` acepta TTL en segundos; sin TTL el valor no expira.
@@ -90,7 +96,8 @@ El servicio siempre intenta obtener datos frescos del backend. Solo usa el cache
 - `tests/test_app.py` — tests de rutas con `create_app('testing')` (sin `@patch`)
 - `tests/test_cache.py`, `tests/test_api_client.py`, `tests/test_services.py` — tests unitarios de capas
 - `tests/test_es6_modules.py` — tests de estructura JS y template ES6 (US-003)
-- `tests/integration/` — tests HTTP end-to-end con Flask test client y MockApiClient
+- `tests/integration/test_termostato_integration.py` — tests HTTP end-to-end con Flask test client y MockApiClient
+- `tests/integration/test_es6_modules_integration.py` — tests de integración de módulos ES6
 - `tests/step_defs/` — step definitions BDD (pytest-bdd 8.x): US-001, US-002 y US-003
 - `tests/features/` — escenarios Gherkin
 - `tests/.pylintrc` — suprime W0621/W0212 (falsos positivos de pytest fixtures)
@@ -106,7 +113,7 @@ Los 13 archivos JS usan `import`/`export` explícitos. El template `index.html` 
 ```
 Grafo de dependencias: `config.js` (hoja) → modulos intermedios → `app.js` (orchestrador).
 jQuery, Bootstrap y Chart.js siguen siendo globales (dependencias externas).
-Las graficas estan en `static/js/graficas/`.
+Los archivos JS se encuentran en `webapp/static/js/`; las graficas en `webapp/static/js/graficas/` (con su propio `graficas/config.js` independiente de `config.js` raiz).
 
 ## Language
 

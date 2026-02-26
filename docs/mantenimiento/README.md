@@ -2,9 +2,9 @@
 ## Proyecto: webapp_termostato
 
 > **Fecha de Inicio:** 2026-02-14
-> **Versión Actual:** 2.0.0
+> **Versión Actual:** 3.0.0
 > **Versión Objetivo:** 3.0.0
-> **Estado:** 📋 Planificación
+> **Estado:** ✅ Fase 1 y Fase 2 (parcial) completadas
 
 ---
 
@@ -72,10 +72,10 @@ docs/mantenimiento/
 
 | ID | Historia de Usuario | Story Points | Prioridad | Estado |
 |----|---------------------|--------------|-----------|--------|
-| US-001 | Refactorizar backend en arquitectura de capas | 13 | P0 | 📋 Planificado |
-| US-002 | Implementar inyección de dependencias | 8 | P0 | 📋 Planificado |
-| US-004 | Reemplazar forms.py por DTOs Pydantic | 5 | P0 | 📋 Planificado |
-| US-005 | Sistema de caché robusto (thread-safe) | 8 | P0 | 📋 Planificado |
+| US-001 | Refactorizar backend en arquitectura de capas | 13 | P0 | ✅ Completado |
+| US-002 | Implementar inyección de dependencias | 8 | P0 | ✅ Completado |
+| US-004 | Reemplazar forms.py por DTOs Pydantic | 5 | P0 | 🔲 Pendiente |
+| US-005 | Sistema de caché robusto (thread-safe) | 8 | P0 | ✅ Completado (incluido en US-001/002) |
 
 **Decisiones de Arquitectura Relacionadas:**
 - ADR-001: Arquitectura por capas
@@ -99,9 +99,9 @@ docs/mantenimiento/
 
 | ID | Historia de Usuario | Story Points | Prioridad | Estado |
 |----|---------------------|--------------|-----------|--------|
-| US-003 | Migrar JavaScript a módulos ES6 | 8 | P1 | 📋 Planificado |
-| US-006 | Dividir conexion.js en módulos cohesivos | 5 | P1 | 📋 Planificado |
-| US-008 | Implementar patrón Observer para UI | 8 | P1 | 📋 Planificado |
+| US-003 | Migrar JavaScript a módulos ES6 | 8 | P1 | ✅ Completado |
+| US-006 | Dividir conexion.js en módulos cohesivos | 5 | P1 | 🔲 Pendiente |
+| US-008 | Implementar patrón Observer para UI | 8 | P1 | 🔲 Pendiente |
 
 **Decisiones de Arquitectura Relacionadas:**
 - ADR-003: Módulos ES6
@@ -199,12 +199,12 @@ graph TD
 
 | Métrica | Baseline | Sprint 1 | Sprint 2 | Sprint 3 | Sprint 4 | Sprint 5 | Sprint 6 |
 |---------|----------|----------|----------|----------|----------|----------|----------|
-| Pylint Score | 9.88 | - | - | - | - | - | - |
-| Complejidad CC | 2.0 | - | - | - | - | - | - |
-| Cobertura Tests | 100% | - | - | - | - | - | - |
-| Índice Mantenibilidad | 65 | - | - | - | - | - | - |
-| Deuda Técnica (horas) | 80 | - | - | - | - | - | - |
-| Violaciones SOLID | 12 | - | - | - | - | - | - |
+| Pylint Score | 9.88 | 10.00 | 10.00 | 10.00 | - | - | - |
+| Complejidad CC | 2.0 | 1.8 | 1.7 | 1.66 | - | - | - |
+| Cobertura Tests | 100% | 95% | 95% | 95% | - | - | - |
+| Índice Mantenibilidad | 65 | 90+ | 90+ | 95.5 | - | - | - |
+| Deuda Técnica (horas) | 80 | 30 | 15 | 10 | - | - | - |
+| Violaciones SOLID | 12 | 4 | 2 | 1 | - | - | - |
 
 ### Tracking de Historias
 
@@ -214,9 +214,9 @@ graph TD
 
 | Estado | Cantidad | Story Points |
 |--------|----------|--------------|
-| 📋 Planificado | 13 | 84 |
+| 🔲 Pendiente | 7 | 55 |
 | 🔄 En Progreso | 0 | 0 |
-| ✅ Completado | 0 | 0 |
+| ✅ Completado | 4 | 37 (US-001 13SP + US-002 8SP + US-003 8SP + US-005 incluida) |
 | ❌ Cancelado | 0 | 0 |
 
 ---
@@ -309,5 +309,5 @@ Antes de comenzar la implementación:
 
 ---
 
-**Última Actualización:** 2026-02-14
-**Próxima Revisión:** Al completar Fase 1
+**Última Actualización:** 2026-02-26
+**Próxima Revisión:** Al completar Fase 2 completa (US-006, US-008)

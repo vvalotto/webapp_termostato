@@ -1,6 +1,6 @@
 # Webapp Termostato
 
-**Version 2.0.0**
+**Version 3.0.0**
 
 Aplicacion web Flask para visualizacion del estado de un termostato IoT. Actua como frontend consumiendo la API REST del backend `app_termostato`.
 
@@ -40,6 +40,19 @@ Despliegue continuo desde GitHub: cada push a `master` actualiza automaticamente
 +---------------------+         +---------------------+
 ```
 
+**Patron BFF (Backend for Frontend) con arquitectura por capas** (v3.0.0):
+
+```
+webapp/
+├── __init__.py     # Application Factory: create_app(config_name)
+├── config.py       # Config / DevelopmentConfig / TestingConfig / ProductionConfig
+├── forms.py        # TermostatoForm (solo renderizado)
+├── models/         # DTOs: TermostatoEstadoDTO
+├── cache/          # ABC Cache + MemoryCache thread-safe con TTL
+├── services/       # ABC ApiClient + RequestsApiClient + MockApiClient + TermostatoService
+└── routes/         # Blueprints: main_bp (/) + api_bp (/api) + health_bp (/health)
+```
+
 ### Arquitectura en Produccion (GCP)
 
 ```
@@ -54,25 +67,21 @@ GitHub (push) --> Cloud Build --> Cloud Run (Frontend)
 ```
 webapp_termostato/
 ├── app.py                  # Punto de entrada
-├── webapp/                 # Aplicacion Flask
-│   ├── __init__.py         # App Flask + rutas
-│   ├── forms.py            # Formularios WTForms
+├── webapp/                 # Aplicacion Flask (arquitectura por capas)
+│   ├── __init__.py         # Application Factory
+│   ├── config.py           # Configuracion por entorno
+│   ├── forms.py            # TermostatoForm (renderizado)
+│   ├── cache/              # Cache ABC + MemoryCache
+│   ├── models/             # DTOs
+│   ├── routes/             # Blueprints Flask
+│   ├── services/           # ApiClient + TermostatoService
 │   ├── templates/          # Templates Jinja2
-│   │   ├── base.html
-│   │   ├── index.html
-│   │   ├── 404.html
-│   │   └── 500.html
-│   └── static/             # Archivos estaticos
-│       ├── css/            # Estilos modulares
-│       ├── js/             # JavaScript modular
-│       └── proyecto.ico
-├── tests/                  # Tests unitarios
-│   └── test_app.py
-├── docs/                   # Documentacion
-├── quality/                # Scripts de calidad
+│   └── static/             # CSS + JS (modulos ES6 nativos)
+├── tests/                  # Tests unitarios, BDD e integracion (181 tests)
+├── docs/                   # Documentacion y ADRs
 ├── requirements.txt        # Dependencias produccion
 ├── requirements-dev.txt    # Dependencias desarrollo
-└── pytest.ini              # Configuracion pytest
+└── pytest.ini              # Configuracion pytest (coverage automatico)
 ```
 
 ## Requisitos
@@ -144,7 +153,7 @@ pytest
 pytest --cov=webapp --cov-report=html
 ```
 
-**Cobertura actual: 100%**
+**Suite: 181 tests — 95% cobertura**
 
 ## API Endpoints
 
@@ -166,14 +175,14 @@ GET /health
 {
   "status": "ok",
   "timestamp": "2025-12-26T19:48:29",
-  "frontend": {"version": "2.0.0", "status": "ok"},
+  "frontend": {"version": "3.0.0", "status": "ok"},
   "backend": {"status": "ok", "version": "1.1.0", "uptime_seconds": 3600}
 }
 
 // Respuesta degradada (503)
 {
   "status": "degraded",
-  "frontend": {"version": "2.0.0", "status": "ok"},
+  "frontend": {"version": "3.0.0", "status": "ok"},
   "backend": {"status": "unavailable", "error": "..."}
 }
 ```
@@ -222,9 +231,9 @@ python quality/scripts/calculate_web_metrics.py .
 ```
 
 **Metricas actuales:**
-- Pylint: 9.88/10
-- Cobertura: 100%
-- Complejidad ciclomatica: 2.0 promedio
+- Pylint: 10.00/10
+- Cobertura: 95%
+- Complejidad ciclomatica: 1.66 promedio
 
 ## Proyecto Relacionado
 
