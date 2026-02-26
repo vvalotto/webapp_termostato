@@ -2,15 +2,14 @@
  * Configuracion compartida para graficas Chart.js
  * WT-23: Refactorizacion modular
  */
-/* global VENTANA_TIEMPO_MS */
-/* exported filtrarPorTiempo, crearOpcionesBase */
+import { VENTANA_TIEMPO_MS } from '../config.js';
 
 /**
  * Filtra un historico para mantener solo los datos de los ultimos 5 minutos
  * @param {Array} historico - Array con datos historicos
  * @returns {Array} Array filtrado con datos recientes
  */
-function filtrarPorTiempo(historico) {
+export function filtrarPorTiempo(historico) {
     const ahora = new Date().getTime();
     return historico.filter(function(item) {
         const fechaItem = new Date(item.fecha_completa).getTime();
@@ -24,7 +23,7 @@ function filtrarPorTiempo(historico) {
  * @param {string} tituloY - Titulo del eje Y
  * @returns {Object} Opciones de configuracion de Chart.js
  */
-function crearOpcionesBase(tituloY) {
+export function crearOpcionesBase(tituloY) {
     return {
         responsive: true,
         maintainAspectRatio: true,

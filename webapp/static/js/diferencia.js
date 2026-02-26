@@ -2,7 +2,6 @@
  * Modulo de diferencia de temperatura (WT-11)
  * Calcula y muestra la diferencia entre temperatura actual y deseada
  */
-/* exported actualizarDiferencia */
 
 /**
  * Calcula la diferencia y determina el estado
@@ -52,7 +51,7 @@ function calcularDiferencia(tempActual, tempDeseada) {
  * @param {number} tempActual - Temperatura ambiente actual
  * @param {number} tempDeseada - Temperatura objetivo
  */
-function actualizarDiferencia(tempActual, tempDeseada) {
+export function actualizarDiferencia(tempActual, tempDeseada) {
     const resultado = calcularDiferencia(tempActual, tempDeseada);
 
     // Actualizar texto

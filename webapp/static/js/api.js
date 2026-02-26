@@ -3,8 +3,8 @@
  * WT-22: Reintentos automaticos en API
  * WT-23: Refactorizacion modular
  */
-/* global CONFIG_REINTENTOS, mostrarReintentando */
-/* exported obtenerEstado */
+import { CONFIG_REINTENTOS } from './config.js';
+import { mostrarReintentando } from './conexion.js';
 
 let intentoActual = 0;
 
@@ -30,7 +30,7 @@ function fetchConTimeout(url, timeout) {
  * @returns {Promise<Object>} Datos del estado
  * @throws {Error} Si todos los reintentos fallan
  */
-async function obtenerEstado() {
+export async function obtenerEstado() {
     intentoActual = 0;
 
     while (intentoActual < CONFIG_REINTENTOS.maxReintentos) {
@@ -52,9 +52,7 @@ async function obtenerEstado() {
             console.warn('WT-22: Intento ' + intentoActual + ' fallido:', error.message);
 
             if (intentoActual < CONFIG_REINTENTOS.maxReintentos) {
-                if (typeof mostrarReintentando === 'function') {
-                    mostrarReintentando(true, intentoActual);
-                }
+                mostrarReintentando(true, intentoActual);
                 // Esperar antes del siguiente reintento (backoff)
                 await new Promise(function(resolve) {
                     setTimeout(resolve, 500 * intentoActual);

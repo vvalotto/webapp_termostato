@@ -3,14 +3,13 @@
  * WT-18: Alerta visual de bateria baja
  * WT-23: Refactorizacion modular
  */
-/* global TOOLTIPS_BATERIA, $ */
-/* exported actualizarCardBateria */
+import { TOOLTIPS_BATERIA } from './config.js';
 
 /**
  * Actualiza la card de bateria segun el nivel del indicador
  * @param {string} indicador - Nivel de bateria ('normal', 'bajo', 'critico')
  */
-function actualizarCardBateria(indicador) {
+export function actualizarCardBateria(indicador) {
     const card = document.getElementById('card-bateria');
     const iconoAlerta = document.getElementById('icono-alerta-bateria');
     if (!card) return;

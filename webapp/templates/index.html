@@ -238,24 +238,7 @@
 
 {% block scripts %}
 {{ super() }}
-<!-- WT-23: Modulos JavaScript refactorizados -->
-<!-- 1. Configuracion global (debe cargarse primero) -->
-<script src="{{ url_for('static', filename='js/config.js') }}"></script>
-<!-- 2. Utilidades base -->
-<script src="{{ url_for('static', filename='js/dom-utils.js') }}"></script>
-<script src="{{ url_for('static', filename='js/validacion.js') }}"></script>
-<!-- 3. Modulos de conexion y API -->
-<script src="{{ url_for('static', filename='js/conexion.js') }}"></script>
-<script src="{{ url_for('static', filename='js/api.js') }}"></script>
-<!-- 4. Modulos de componentes UI -->
-<script src="{{ url_for('static', filename='js/bateria.js') }}"></script>
-<script src="{{ url_for('static', filename='js/tendencia.js') }}"></script>
-<script src="{{ url_for('static', filename='js/diferencia.js') }}"></script>
-<script src="{{ url_for('static', filename='js/historial.js') }}"></script>
-<!-- 5. Graficas -->
-<script src="{{ url_for('static', filename='js/graficas/config.js') }}"></script>
-<script src="{{ url_for('static', filename='js/graficas/temperatura.js') }}"></script>
-<script src="{{ url_for('static', filename='js/graficas/climatizador.js') }}"></script>
-<!-- 6. Aplicacion principal (debe cargarse al final) -->
-<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+<!-- US-003: Modulos ES6 — entry point unico, el browser resuelve dependencias -->
+<script nomodule>alert('Tu navegador no soporta módulos ES6. Por favor actualizá a Chrome 90+, Firefox 88+ o Safari 14+.');</script>
+<script type="module" src="{{ url_for('static', filename='js/app.js') }}"></script>
 {% endblock %}

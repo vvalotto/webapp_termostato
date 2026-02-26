@@ -5,9 +5,8 @@
  * WT-22: Indicador de reintentando
  * WT-23: Refactorizacion modular
  */
-/* global ESTADOS_CONEXION, CONFIG_REINTENTOS, tiempoTranscurrido, UMBRAL_OBSOLETO_MS */
-/* exported mostrarReintentando, actualizarEstadoConexion, actualizarTimestamp,
-   mostrarActualizando, inicializarBannerCerrar, getUltimaActualizacion, setUltimaActualizacion */
+import { ESTADOS_CONEXION, CONFIG_REINTENTOS, UMBRAL_OBSOLETO_MS } from './config.js';
+import { tiempoTranscurrido } from './dom-utils.js';
 
 // Estado del modulo
 let ultimaActualizacion = null;
@@ -18,7 +17,7 @@ let bannerCerradoManualmente = false;
  * Obtiene el timestamp de la ultima actualizacion
  * @returns {number|null} Timestamp o null
  */
-function getUltimaActualizacion() {
+export function getUltimaActualizacion() {
     return ultimaActualizacion;
 }
 
@@ -26,7 +25,7 @@ function getUltimaActualizacion() {
  * Establece el timestamp de la ultima actualizacion
  * @param {number} timestamp - Nuevo timestamp
  */
-function setUltimaActualizacion(timestamp) {
+export function setUltimaActualizacion(timestamp) {
     ultimaActualizacion = timestamp;
 }
 
@@ -67,7 +66,7 @@ function mostrarNotificacionReconexion() {
 /**
  * Inicializa el boton de cerrar del banner
  */
-function inicializarBannerCerrar() {
+export function inicializarBannerCerrar() {
     const botonCerrar = document.querySelector('.banner-cerrar');
     if (botonCerrar) {
         botonCerrar.addEventListener('click', function() {
@@ -95,7 +94,7 @@ function manejarReconexion(estadoNuevo) {
  * @param {boolean} visible - Si mostrar el indicador
  * @param {number} intento - Numero de intento actual
  */
-function mostrarReintentando(visible, intento) {
+export function mostrarReintentando(visible, intento) {
     const contenedor = document.getElementById('estado-conexion');
     const icono = document.getElementById('icono-estado');
     const texto = document.getElementById('texto-estado');
@@ -115,7 +114,7 @@ function mostrarReintentando(visible, intento) {
  * Actualiza el indicador de estado de conexion
  * @param {string} estado - Estado de conexion ('online', 'offline', 'obsoleto')
  */
-function actualizarEstadoConexion(estado) {
+export function actualizarEstadoConexion(estado) {
     const contenedor = document.getElementById('estado-conexion');
     const icono = document.getElementById('icono-estado');
     const texto = document.getElementById('texto-estado');
@@ -146,7 +145,7 @@ function actualizarEstadoConexion(estado) {
 /**
  * Actualiza el timestamp mostrado
  */
-function actualizarTimestamp() {
+export function actualizarTimestamp() {
     const timestampEl = document.getElementById('timestamp-estado');
     const bannerTiempo = document.getElementById('banner-tiempo');
 
@@ -170,7 +169,7 @@ function actualizarTimestamp() {
  * Muestra/oculta el icono de actualizacion
  * @param {boolean} visible - Si mostrar el icono
  */
-function mostrarActualizando(visible) {
+export function mostrarActualizando(visible) {
     const icono = document.getElementById('icono-estado');
     if (!icono) return;
 

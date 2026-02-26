@@ -89,16 +89,24 @@ El servicio siempre intenta obtener datos frescos del backend. Solo usa el cache
 **Tests:**
 - `tests/test_app.py` — tests de rutas con `create_app('testing')` (sin `@patch`)
 - `tests/test_cache.py`, `tests/test_api_client.py`, `tests/test_services.py` — tests unitarios de capas
+- `tests/test_es6_modules.py` — tests de estructura JS y template ES6 (US-003)
 - `tests/integration/` — tests HTTP end-to-end con Flask test client y MockApiClient
-- `tests/step_defs/` — step definitions BDD (pytest-bdd 8.x): US-001 y US-002
+- `tests/step_defs/` — step definitions BDD (pytest-bdd 8.x): US-001, US-002 y US-003
 - `tests/features/` — escenarios Gherkin
 - `tests/.pylintrc` — suprime W0621/W0212 (falsos positivos de pytest fixtures)
 
 **TermostatoForm (forms.py):**
 Se usa exclusivamente para renderizado en plantillas, no para validacion. Los campos se asignan como atributos de instancia dinamicamente en la vista.
 
-**JavaScript modular (static/js/):**
-Los modulos JS se cargan via `<script>` en `index.html` en orden de dependencias: `config.js` → modulos de feature (api.js, bateria.js, conexion.js, etc.) → `app.js` (coordinador). Las graficas estan en `static/js/graficas/`.
+**JavaScript — Modulos ES6 nativos (desde US-003):**
+Los 13 archivos JS usan `import`/`export` explícitos. El template `index.html` carga un unico entry point:
+```html
+<script nomodule>alert('Actualiza tu navegador...');</script>
+<script type="module" src=".../js/app.js"></script>
+```
+Grafo de dependencias: `config.js` (hoja) → modulos intermedios → `app.js` (orchestrador).
+jQuery, Bootstrap y Chart.js siguen siendo globales (dependencias externas).
+Las graficas estan en `static/js/graficas/`.
 
 ## Language
 

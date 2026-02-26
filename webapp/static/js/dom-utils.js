@@ -3,7 +3,6 @@
  * WT-21: Marca valores invalidos con clase especial
  * WT-23: Refactorizacion modular
  */
-/* exported actualizarValor, actualizarBadge, tiempoTranscurrido */
 
 /**
  * Actualiza un valor en el DOM si ha cambiado
@@ -11,7 +10,7 @@
  * @param {any} valor - Nuevo valor
  * @param {string} sufijo - Sufijo opcional (ej: unidad)
  */
-function actualizarValor(elementId, valor, sufijo) {
+export function actualizarValor(elementId, valor, sufijo) {
     if (sufijo === undefined) sufijo = '';
     const elemento = document.getElementById(elementId);
     if (!elemento) return;
@@ -37,7 +36,7 @@ function actualizarValor(elementId, valor, sufijo) {
  * @param {string} valor - Nuevo valor del badge
  * @param {string} claseBase - Clase CSS base del badge
  */
-function actualizarBadge(elementId, valor, claseBase) {
+export function actualizarBadge(elementId, valor, claseBase) {
     const elemento = document.getElementById(elementId);
     if (!elemento) return;
 
@@ -65,7 +64,7 @@ function actualizarBadge(elementId, valor, claseBase) {
  * @param {number} timestamp - Timestamp en milisegundos
  * @returns {string} Tiempo formateado (ej: "hace 30s", "hace 2min")
  */
-function tiempoTranscurrido(timestamp) {
+export function tiempoTranscurrido(timestamp) {
     if (!timestamp) return 'nunca';
     const segundos = Math.floor((Date.now() - timestamp) / 1000);
     if (segundos < 60) return 'hace ' + segundos + 's';

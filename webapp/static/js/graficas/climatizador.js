@@ -2,8 +2,8 @@
  * Modulo de grafica de estados del climatizador
  * WT-23: Refactorizacion modular
  */
-/* global CLIMATIZADOR_KEY, Chart, filtrarPorTiempo, crearOpcionesBase */
-/* exported actualizarGraficaClimatizador */
+import { CLIMATIZADOR_KEY } from '../config.js';
+import { filtrarPorTiempo, crearOpcionesBase } from './config.js';
 
 let chartClimatizador = null;
 
@@ -153,7 +153,7 @@ function crearGraficaClimatizador(ctx, labels, datos) {
 /**
  * Crea o actualiza la grafica del climatizador
  */
-function actualizarGraficaClimatizador() {
+export function actualizarGraficaClimatizador() {
     const estado = obtenerEstadoClimatizador();
     if (estado === null) {
         console.log('No se pudo obtener estado del climatizador');

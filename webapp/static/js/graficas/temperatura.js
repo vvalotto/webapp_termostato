@@ -4,10 +4,9 @@
  * WT-15: Soporte para historial de API
  * WT-16: Zona de confort en grafica
  */
-/* global TEMPERATURA_KEY, RANGOS_TIEMPO, Chart, filtrarPorTiempo, crearOpcionesBase,
-   obtenerHistorialAPI */
-/* exported actualizarGraficaTemperatura, cambiarRangoGrafica, getChartTemperatura,
-   recargarHistorialAPI */
+import { TEMPERATURA_KEY, RANGOS_TIEMPO } from '../config.js';
+import { filtrarPorTiempo, crearOpcionesBase } from './config.js';
+import { obtenerHistorialAPI } from '../historial.js';
 
 let chartTemperatura = null;
 let usandoHistorialAPI = false;
@@ -17,7 +16,7 @@ let rangoActualConfig = null;
  * Obtiene la instancia del chart (para uso externo)
  * @returns {Chart|null} Instancia del chart o null
  */
-function getChartTemperatura() {
+export function getChartTemperatura() {
     return chartTemperatura;
 }
 
@@ -249,7 +248,7 @@ function renderizarGrafica(historico) {
  * @param {string} rango - Clave del rango seleccionado
  * @param {Array|null} historialAPI - Datos de la API o null para usar localStorage
  */
-function cambiarRangoGrafica(rango, historialAPI) {
+export function cambiarRangoGrafica(rango, historialAPI) {
     const config = RANGOS_TIEMPO[rango];
     if (!config) return;
 
@@ -269,7 +268,7 @@ function cambiarRangoGrafica(rango, historialAPI) {
 /**
  * Recarga el historial de la API para el rango actual
  */
-async function recargarHistorialAPI() {
+export async function recargarHistorialAPI() {
     if (!usandoHistorialAPI || !rangoActualConfig) return;
 
     try {
@@ -285,7 +284,7 @@ async function recargarHistorialAPI() {
 /**
  * Crea o actualiza la grafica de temperatura
  */
-function actualizarGraficaTemperatura() {
+export function actualizarGraficaTemperatura() {
     const temperatura = obtenerTemperaturaActual();
     if (temperatura === null || isNaN(temperatura)) {
         console.log('No se pudo obtener temperatura valida');

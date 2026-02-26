@@ -2,22 +2,19 @@
  * Configuracion global del modulo de actualizacion
  * WT-23: Refactorizacion modular
  */
-/* exported INTERVALO_MS, UMBRAL_OBSOLETO_MS, VENTANA_TIEMPO_MS, TEMPERATURA_KEY,
-   CLIMATIZADOR_KEY, RANGO_PREFERENCIA_KEY, RANGOS_TIEMPO, CONFIG_REINTENTOS,
-   REGLAS_VALIDACION, TOOLTIPS_BATERIA, ESTADOS_CONEXION */
 
 // Intervalos de tiempo
-const INTERVALO_MS = 10000; // 10 segundos entre actualizaciones
-const UMBRAL_OBSOLETO_MS = 30000; // 30 segundos para considerar datos obsoletos
+export const INTERVALO_MS = 10000; // 10 segundos entre actualizaciones
+export const UMBRAL_OBSOLETO_MS = 30000; // 30 segundos para considerar datos obsoletos
 
 // Configuracion de graficas
-const VENTANA_TIEMPO_MS = 5 * 60 * 1000; // 5 minutos en milisegundos
-const TEMPERATURA_KEY = 'temperatura_historico';
-const CLIMATIZADOR_KEY = 'climatizador_historico';
-const RANGO_PREFERENCIA_KEY = 'grafica_rango_preferido';
+export const VENTANA_TIEMPO_MS = 5 * 60 * 1000; // 5 minutos en milisegundos
+export const TEMPERATURA_KEY = 'temperatura_historico';
+export const CLIMATIZADOR_KEY = 'climatizador_historico';
+export const RANGO_PREFERENCIA_KEY = 'grafica_rango_preferido';
 
 // WT-15: Rangos de tiempo disponibles para graficas
-const RANGOS_TIEMPO = {
+export const RANGOS_TIEMPO = {
     '5min': { label: '5 min', ms: 5 * 60 * 1000, usaAPI: false },
     '1h': { label: '1 hora', ms: 60 * 60 * 1000, usaAPI: true, limite: 60 },
     '6h': { label: '6 horas', ms: 6 * 60 * 60 * 1000, usaAPI: true, limite: 360 },
@@ -25,13 +22,13 @@ const RANGOS_TIEMPO = {
 };
 
 // WT-22: Configuracion de reintentos
-const CONFIG_REINTENTOS = {
+export const CONFIG_REINTENTOS = {
     maxReintentos: 3,
     timeouts: [2000, 4000, 8000] // Timeout progresivo en ms
 };
 
 // WT-21: Reglas de validacion para cada campo de la API
-const REGLAS_VALIDACION = {
+export const REGLAS_VALIDACION = {
     temperatura_ambiente: { tipo: 'number', min: 0, max: 50 },
     temperatura_deseada: { tipo: 'number', min: 15, max: 30 },
     carga_bateria: { tipo: 'number', min: 0, max: 5 },
@@ -40,14 +37,14 @@ const REGLAS_VALIDACION = {
 };
 
 // WT-18: Configuracion de tooltips segun nivel de bateria
-const TOOLTIPS_BATERIA = {
+export const TOOLTIPS_BATERIA = {
     normal: 'Bateria con carga suficiente',
     bajo: 'Bateria baja - Considere recargar pronto',
     critico: 'Bateria critica - Riesgo de apagado inminente'
 };
 
 // WT-19: Configuracion visual para cada estado de conexion
-const ESTADOS_CONEXION = {
+export const ESTADOS_CONEXION = {
     online: {
         clase: 'online',
         icono: 'glyphicon-ok',
