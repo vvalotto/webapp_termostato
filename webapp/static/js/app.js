@@ -4,13 +4,24 @@
  * WT-12: Actualizacion sin recarga de pagina
  * WT-23: Refactorizacion modular
  */
-/* global INTERVALO_MS, validarDatos, obtenerEstado, actualizarValor, actualizarBadge,
-   actualizarCardBateria, actualizarEstadoConexion, actualizarTimestamp,
-   mostrarActualizando, inicializarBannerCerrar, actualizarIndicadorTendencia,
-   actualizarGraficaTemperatura, actualizarGraficaClimatizador,
-   setUltimaActualizacion, getUltimaActualizacion, actualizarDiferencia,
-   inicializarSelectorRango, cambiarRangoGrafica, $ */
-/* exported detenerActualizacion */
+import { INTERVALO_MS } from './config.js';
+import { obtenerEstado } from './api.js';
+import { validarDatos } from './validacion.js';
+import { actualizarValor, actualizarBadge } from './dom-utils.js';
+import {
+    actualizarEstadoConexion,
+    actualizarTimestamp,
+    mostrarActualizando,
+    inicializarBannerCerrar,
+    setUltimaActualizacion,
+    getUltimaActualizacion
+} from './conexion.js';
+import { actualizarCardBateria } from './bateria.js';
+import { actualizarIndicadorTendencia } from './tendencia.js';
+import { actualizarDiferencia } from './diferencia.js';
+import { actualizarGraficaTemperatura, cambiarRangoGrafica } from './graficas/temperatura.js';
+import { actualizarGraficaClimatizador } from './graficas/climatizador.js';
+import { inicializarSelectorRango } from './historial.js';
 
 let intervalId = null;
 let timestampIntervalId = null;
@@ -155,7 +166,7 @@ function iniciarActualizacion() {
 /**
  * Detiene el ciclo de actualizacion
  */
-function detenerActualizacion() {
+export function detenerActualizacion() {
     if (intervalId) {
         clearInterval(intervalId);
         intervalId = null;

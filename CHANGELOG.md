@@ -27,6 +27,38 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
 ---
 
+#### US-002: Implementar Inyeccion de Dependencias
+
+- **MockApiClient** — cliente de test con `call_count`, `last_path`, `raise_error`
+- **ApiError** (base) → `ApiConnectionError`, `ApiTimeoutError` — excepciones custom
+- **MemoryCache TTL** — `set(key, value, ttl=None)` con expiracion configurable
+- **create_app('testing')** inyecta `MockApiClient` automaticamente
+- Tests: sin `@patch` en rutas/servicios; mocks inyectados via DI
+
+### Metricas US-002
+
+- Pylint: 8.38/10 | CC: promedio bajo | Coverage: 95% | Tests: 101/101
+
+---
+
+#### US-003: Migrar JavaScript a Modulos ES6
+
+- **13 archivos JS** migrados de variables globales a modulos ES6 nativos (`import`/`export`)
+- **Template `index.html`** — 11 `<script>` individuales reemplazados por 1 `<script type="module">`
+- **`<script nomodule>`** — mensaje de advertencia para navegadores sin soporte ES6
+- **`.eslintrc.json`** — actualizado con `"sourceType": "module"` y regla `no-implicit-globals`
+- Variables globales eliminadas: 30+ → 0 (excepto jQuery, Bootstrap y Chart.js, dependencias externas)
+- Grafo de dependencias JS explicitado: `config.js` (hoja) → modulos intermedios → `app.js` (entry point)
+- **Tests unitarios** — 60 tests de estructura de modulos y template ES6
+- **Tests de integracion** — 13 tests de endpoints que el JS consume
+- **Tests BDD** — 7 escenarios Gherkin validando comportamiento del usuario final
+
+### Metricas US-003
+
+- Pylint: 8.73/10 | CC: promedio 2.41 | ESLint: 0 errores, 0 warnings | Coverage: 95% | Tests: 181/181
+
+---
+
 ## [2.0.0] - 2025-12-26
 
 ### Agregado

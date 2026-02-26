@@ -3,8 +3,7 @@
  * WT-21: Validacion de datos de la API
  * WT-23: Refactorizacion modular
  */
-/* global REGLAS_VALIDACION */
-/* exported validarDatos */
+import { REGLAS_VALIDACION } from './config.js';
 
 /**
  * Valida un campo segun sus reglas
@@ -48,7 +47,7 @@ function validarCampo(campo, valor) {
  * @param {Object} datos - Datos recibidos de la API
  * @returns {Object} Datos validados con valores corregidos si es necesario
  */
-function validarDatos(datos) {
+export function validarDatos(datos) {
     const datosValidados = {};
     let hayErrores = false;
 

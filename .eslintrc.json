@@ -4,7 +4,8 @@
     "es2021": true
   },
   "parserOptions": {
-    "ecmaVersion": "latest"
+    "ecmaVersion": "latest",
+    "sourceType": "module"
   },
   "globals": {
     "Chart": "readonly",
@@ -18,6 +19,7 @@
     "no-var": "warn",
     "prefer-const": "warn",
     "no-console": "off",
+    "no-implicit-globals": "error",
     "complexity": ["error", 10],
     "max-depth": ["error", 4],
     "max-lines-per-function": ["warn", 50],

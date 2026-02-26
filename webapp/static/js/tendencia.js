@@ -3,8 +3,7 @@
  * WT-9: Indicadores visuales de tendencia
  * WT-23: Refactorizacion modular
  */
-/* global TEMPERATURA_KEY */
-/* exported actualizarIndicadorTendencia */
+import { TEMPERATURA_KEY } from './config.js';
 
 /**
  * Obtiene el historico de temperaturas desde localStorage
@@ -138,7 +137,7 @@ function generarTextoTendencia(tempActual, tempDeseada, estadoClimatizador, dire
  * @param {number} tempDeseada - Temperatura objetivo
  * @param {string} estadoClimatizador - Estado del climatizador
  */
-function actualizarIndicadorTendencia(tempActual, tempDeseada, estadoClimatizador) {
+export function actualizarIndicadorTendencia(tempActual, tempDeseada, estadoClimatizador) {
     const flechaEl = document.getElementById('tendencia-flecha');
     const iconoEl = document.getElementById('tendencia-icono');
     const textoEl = document.getElementById('tendencia-texto');

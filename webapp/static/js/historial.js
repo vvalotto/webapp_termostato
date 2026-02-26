@@ -2,8 +2,7 @@
  * Modulo de historial de temperatura (WT-15)
  * Maneja la obtencion de datos historicos desde la API
  */
-/* global RANGOS_TIEMPO, RANGO_PREFERENCIA_KEY */
-/* exported obtenerHistorialAPI, getRangoActual, setRangoActual, inicializarSelectorRango */
+import { RANGOS_TIEMPO, RANGO_PREFERENCIA_KEY } from './config.js';
 
 let rangoActual = '5min';
 
@@ -11,7 +10,7 @@ let rangoActual = '5min';
  * Obtiene el rango guardado en localStorage o el default
  * @returns {string} Clave del rango actual
  */
-function getRangoActual() {
+export function getRangoActual() {
     const guardado = localStorage.getItem(RANGO_PREFERENCIA_KEY);
     if (guardado && RANGOS_TIEMPO[guardado]) {
         return guardado;
@@ -23,7 +22,7 @@ function getRangoActual() {
  * Guarda el rango seleccionado en localStorage
  * @param {string} rango - Clave del rango a guardar
  */
-function setRangoActual(rango) {
+export function setRangoActual(rango) {
     if (RANGOS_TIEMPO[rango]) {
         rangoActual = rango;
         localStorage.setItem(RANGO_PREFERENCIA_KEY, rango);
@@ -35,7 +34,7 @@ function setRangoActual(rango) {
  * @param {number} limite - Numero maximo de registros
  * @returns {Promise<Array>} Array con datos del historial
  */
-async function obtenerHistorialAPI(limite) {
+export async function obtenerHistorialAPI(limite) {
     try {
         const response = await fetch('/api/historial?limite=' + limite);
         const data = await response.json();
@@ -100,7 +99,7 @@ function actualizarBotonesRango(rangoSeleccionado) {
  * Inicializa el selector de rango de tiempo
  * @param {Function} callbackCambioRango - Funcion a llamar cuando cambia el rango
  */
-function inicializarSelectorRango(callbackCambioRango) {
+export function inicializarSelectorRango(callbackCambioRango) {
     // Cargar preferencia guardada
     rangoActual = getRangoActual();
     actualizarBotonesRango(rangoActual);
